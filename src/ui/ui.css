@@ -1,0 +1,353 @@
+.stage {
+  position: fixed;
+  inset: 0;
+  background: #06060a;
+}
+
+/* ---------- power-on self test ---------- */
+
+.post {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  background: #000000;
+  color: #ffffff;
+  font-family: "Lucida Console", ui-monospace, "Courier New", monospace;
+  font-size: clamp(17px, 2.35vw, 30px);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  white-space: pre-wrap;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.28);
+  transition:
+    opacity 0.35s ease,
+    visibility 0.35s ease;
+}
+
+.post-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  padding: clamp(28px, 5vh, 64px) clamp(28px, 6vw, 88px);
+}
+
+.post.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Scanlines and a soft tube vignette, so the first thing you see is a CRT. */
+.post::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.14) 0px,
+    rgba(0, 0, 0, 0.14) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+.post::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    transparent 48%,
+    rgba(0, 0, 0, 0.32) 100%
+  );
+  pointer-events: none;
+}
+
+.post-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(20px, 4vw, 48px);
+  width: 100%;
+  margin-bottom: clamp(20px, 3.5vh, 40px);
+}
+
+.post-bios {
+  flex: 1;
+  font-size: clamp(19px, 2.8vw, 34px);
+  line-height: 1.45;
+}
+
+.post-memory {
+  margin-bottom: clamp(16px, 2.5vh, 28px);
+  font-size: clamp(18px, 2.5vw, 32px);
+}
+
+.post-foot {
+  margin-top: auto;
+  padding-top: clamp(20px, 3vh, 36px);
+  font-size: clamp(17px, 2.2vw, 28px);
+}
+
+.post-badge {
+  flex: none;
+  align-self: flex-start;
+  padding: 6px 12px 8px;
+  border: 2px solid #ffffff;
+  color: #7dff7d;
+  font-size: clamp(12px, 1.4vw, 16px);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-shadow: none;
+}
+
+.post-badge span {
+  display: block;
+  color: #ffffff;
+  letter-spacing: 0.1em;
+}
+
+.post b {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.post .ok {
+  color: #7dff7d;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(125, 255, 125, 0.45);
+}
+
+.post-devices {
+  flex: 1;
+  min-height: 38vh;
+  font-size: clamp(16px, 2.15vw, 28px);
+  line-height: 1.65;
+}
+
+.post-prompt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 0.9em;
+}
+
+.post-enter {
+  padding: 4px 14px 5px;
+  border: 0;
+  background: #c0c0c0;
+  box-shadow:
+    inset -1px -1px 0 #000000,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #808080,
+    inset 2px 2px 0 #dfdfdf;
+  color: #000000;
+  font-family: Tahoma, "MS Sans Serif", Geneva, Verdana, sans-serif;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.post-enter:active {
+  box-shadow:
+    inset -1px -1px 0 #ffffff,
+    inset 1px 1px 0 #808080,
+    inset -2px -2px 0 #dfdfdf,
+    inset 2px 2px 0 #000000;
+}
+
+.post-enter[disabled] {
+  color: #808080;
+  text-shadow: 1px 1px 0 #ffffff;
+  cursor: progress;
+}
+
+.post-cursor {
+  display: inline-block;
+  width: 0.62em;
+  height: 1.1em;
+  translate: 0 0.16em;
+  background: #ffffff;
+  animation: post-blink 1s steps(2, end) infinite;
+}
+
+@keyframes post-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- title screen ---------- */
+
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  background: #000000;
+  transition:
+    opacity 0.45s ease,
+    visibility 0.45s ease;
+}
+
+.start-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.start-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(24px, 4vh, 40px);
+  width: min(94vw, 760px);
+  padding: clamp(40px, 6vh, 72px) clamp(36px, 5vw, 56px);
+  border: 3px solid #ffffff;
+  color: #ffffff;
+  font-family: "Lucida Console", ui-monospace, "Courier New", monospace;
+  text-align: center;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.32);
+}
+
+.start-title,
+.start-subtitle {
+  margin: 0;
+  font-size: clamp(20px, 3.4vw, 34px);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+}
+
+.start-subtitle {
+  font-size: clamp(18px, 2.8vw, 28px);
+  font-weight: 700;
+}
+
+.start-button {
+  min-width: clamp(140px, 22vw, 200px);
+  padding: 14px 32px;
+  border: 3px solid #ffffff;
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  font-size: clamp(18px, 3vw, 30px);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.start-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.start-button:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* ---------- hud ---------- */
+
+.hud {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  font-family: Tahoma, "MS Sans Serif", Geneva, Verdana, sans-serif;
+  color: #d6d6d6;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.hud.dim {
+  opacity: 0;
+}
+
+.hud .brand {
+  position: absolute;
+  top: 20px;
+  left: 22px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.hud .brand small {
+  display: block;
+  margin-top: 2px;
+  color: #b8b8c0;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.hud .controls {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: flex;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.hud button {
+  min-width: 84px;
+  padding: 4px 10px 5px;
+  border: 0;
+  background: #c0c0c0;
+  box-shadow:
+    inset -1px -1px 0 #000000,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #808080,
+    inset 2px 2px 0 #dfdfdf;
+  color: #000000;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.hud button:active {
+  box-shadow:
+    inset -1px -1px 0 #ffffff,
+    inset 1px 1px 0 #808080,
+    inset -2px -2px 0 #dfdfdf,
+    inset 2px 2px 0 #000000;
+}
+
+/* Balloon help, the way it looked before tooltips got rounded corners. */
+.hud .hint {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  translate: -50% 0;
+  padding: 3px 8px 4px;
+  border: 1px solid #000000;
+  background: #ffffe1;
+  color: #000000;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.hud .hint strong {
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .hud .brand {
+    font-size: 15px;
+  }
+
+  .hud .brand small {
+    font-size: 12px;
+  }
+
+  .hud .hint {
+    font-size: 11px;
+  }
+}
