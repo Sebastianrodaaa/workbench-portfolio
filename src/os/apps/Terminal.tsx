@@ -3,6 +3,7 @@ import {
   about,
   education,
   experience,
+  hackathons,
   profile,
   readme,
   skills,
@@ -47,6 +48,15 @@ const FILES: Record<string, () => string> = {
   "education.txt": () =>
     education
       .map((entry) => `${entry.period}\n${entry.credential}\n${entry.school}`)
+      .join("\n\n"),
+  "hackathons.txt": () =>
+    hackathons
+      .map((win) => {
+        const awards = win.awards?.length
+          ? `\n${win.awards.join(" · ")}`
+          : "";
+        return `${win.place}${awards}\n${win.event}\n${win.location}`;
+      })
       .join("\n\n"),
   "skills.txt": () =>
     skills.map((g) => `${g.group}:\n  ${g.items.join(", ")}`).join("\n\n"),

@@ -29,6 +29,7 @@ export const about = {
   paragraphs: [
     "Multidisciplinary Project Manager and Forward Deployed Engineer working at the intersection of technology, sociology, and ontology.",
     "Three years shipping end-to-end products — from field discovery through architecture, verification, and production deployment.",
+    "Four hackathon podiums across NYC and Paris — building agent systems under real constraints, from IBM agent orchestration to defence tech in Europe.",
     "Current focus: locally hosted models and security, frontier AI, distributed systems, and machine learning — training models for complex real-world workflows, putting them into production, and automating those pipelines with AI.",
   ],
   facts: [
@@ -38,8 +39,46 @@ export const about = {
       value:
         "Local hosting & security · frontier AI · distributed systems · production ML & automation",
     },
+    { label: "Hackathons", value: "4 podiums · NYC & Paris" },
   ],
 };
+
+export type HackathonWin = {
+  id: string;
+  place: string;
+  awards?: string[];
+  event: string;
+  location: string;
+};
+
+export const hackathons: HackathonWin[] = [
+  {
+    id: "ibm-agent",
+    place: "1st Place",
+    awards: ["Best Use Case"],
+    event: "IBM Agent Orchestration Hackathon",
+    location: "New York, NY",
+  },
+  {
+    id: "fordham-pulse",
+    place: "2nd Place",
+    awards: ["Best Use Case"],
+    event: "Fordham Business School × Pulse AI Foundry — GEO Agent Hackathon",
+    location: "New York, NY",
+  },
+  {
+    id: "eu-defence",
+    place: "3rd Place",
+    event: "European Defence Tech Hackathon",
+    location: "Paris, France",
+  },
+  {
+    id: "deepmind-cv",
+    place: "Honorable Mention",
+    event: "Google DeepMind × Cerebral Valley Hackathon",
+    location: "New York, NY",
+  },
+];
 
 export type Experience = {
   id: string;
@@ -239,6 +278,10 @@ export const readme = {
     {
       heading: "RECENT FIELD WORK",
       body: "This summer I forward-deployed with Meta's product development team on the new Meta glasses launch — QA on hardware, mapping user friction, supporting production, and helping with the launch campaign. At Amazon I built an interactive Nike e-commerce production using off-axis projection, Python 3D rendering, and TouchDesigner. Through Roda Ventures I partner with teams at Meta, Amazon, and Hoka to drive the same spec → implement → verify discipline on every engagement.",
+    },
+    {
+      heading: "HACKATHON WINS",
+      body: "1st & Best Use Case — IBM Agent Orchestration Hackathon (NYC). 2nd & Best Use Case — Fordham Business School × Pulse AI Foundry GEO Agent Hackathon (NYC). 3rd — European Defence Tech Hackathon (Paris). Honorable Mention — Google DeepMind × Cerebral Valley Hackathon (NYC).",
     },
     {
       heading: "WHY FORWARD DEPLOYED",

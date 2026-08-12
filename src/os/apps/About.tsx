@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { about, education, profile, skills } from "../../lib/content";
+import { about, education, hackathons, profile, skills } from "../../lib/content";
 
-const TABS = ["General", "Education", "Skills"] as const;
+const TABS = ["General", "Education", "Hackathons", "Skills"] as const;
 type Tab = (typeof TABS)[number];
 
 export function About() {
@@ -55,6 +55,21 @@ export function About() {
                   <br />
                   {entry.place}
                 </p>
+              </fieldset>
+            ))}
+          </>
+        )}
+
+        {tab === "Hackathons" && (
+          <>
+            {hackathons.map((win) => (
+              <fieldset className="group" key={win.id}>
+                <legend>{win.location}</legend>
+                <h4>{win.place}</h4>
+                {win.awards && win.awards.length > 0 && (
+                  <p className="eyebrow">{win.awards.join(" · ")}</p>
+                )}
+                <p>{win.event}</p>
               </fieldset>
             ))}
           </>
