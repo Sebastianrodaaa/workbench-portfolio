@@ -11,13 +11,10 @@ export function Desktop() {
   const windows = useStore((state) => state.windows);
   const zTop = useStore((state) => state.zTop);
   const openWindow = useStore((state) => state.openWindow);
-  const setStage = useStore((state) => state.setStage);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
 
   const launch = (id: WindowId) => {
     openWindow(id);
-    setMenuOpen(false);
   };
 
   return (
@@ -26,7 +23,6 @@ export function Desktop() {
         className="desk-surface"
         onPointerDown={(event) => {
           if (event.target !== event.currentTarget) return;
-          setMenuOpen(false);
           setSelected(null);
         }}
       >
@@ -90,52 +86,10 @@ export function Desktop() {
           );
         })}
 
-        {menuOpen && (
-          <nav className="start-menu">
-            <div className="spine" aria-hidden>
-              <span>
-                Workbench<b>95</b>
-              </span>
-            </div>
-            <div className="items">
-              {DESKTOP_ORDER.map((id) => (
-                <button type="button" key={id} onClick={() => launch(id)}>
-                  {APPS[id].icon}
-                  {APPS[id].label}
-                </button>
-              ))}
-              <div className="sep" />
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setStage("desk");
-                }}
-              >
-                {IconShutdown}
-                Step away...
-              </button>
-            </div>
-          </nav>
-        )}
       </div>
 
-      <Taskbar
-        menuOpen={menuOpen}
-        onToggleMenu={() => setMenuOpen((open) => !open)}
-      />
+      <Taskbar />
     </div>
   );
 }
 
-const IconShutdown = (
-  <svg viewBox="0 0 32 32" aria-hidden>
-    <rect x="4" y="8" width="24" height="17" fill="#c0c0c0" />
-    <rect x="4" y="8" width="24" height="1" fill="#ffffff" />
-    <rect x="27" y="8" width="1" height="17" fill="#404040" />
-    <rect x="4" y="24" width="24" height="1" fill="#404040" />
-    <rect x="8" y="12" width="16" height="9" fill="#000080" />
-    <rect x="15" y="4" width="2" height="9" fill="#404040" />
-    <rect x="14" y="14" width="4" height="5" fill="#ff9d00" />
-  </svg>
-);

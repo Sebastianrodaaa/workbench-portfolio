@@ -123,46 +123,6 @@ export const experience: Experience[] = [
       "Forward deployed",
     ],
   },
-  {
-    id: "noem",
-    company: "NOEM",
-    title: "Co-Founder and Systems Architect",
-    period: "January 2026 — Present",
-    meta: "Series A",
-    summary:
-      "Context-aware AI infrastructure, and the iOS app that runs on top of it.",
-    bullets: [
-      "Designed, built, and shipped Noem — Context, a native iOS and iPadOS app on the App Store, scaling to 4,921 active customers, 567 paid subscriptions, and $2,966 MRR, with 1,500 new customers in 28 days.",
-      "Architected context-aware AI infrastructure that translates raw real-world signals into structured machine intelligence, enabling more accurate and adaptive inference pipelines.",
-      "Applied machine learning and statistical modeling to improve inference quality and system adaptability.",
-      "Drove product development from prototyping AI-driven workflows through architecture decisions, cutting iteration cycles with tight feedback loops.",
-      "Built and maintained ML pipelines covering data ingestion, feature engineering, model training, FastAPI deployment, and MLflow monitoring, cutting model refresh cycles from 2 weeks to 3 days.",
-    ],
-    tags: [
-      "RAG and LLM pipelines",
-      "Agentic frameworks",
-      "MLOps",
-      "LangChain",
-      "0-to-1 product",
-      "Fundraising",
-    ],
-    href: "https://apps.apple.com/app/id6758187503",
-  },
-  {
-    id: "arc-hoops",
-    company: "ARC-Hoops",
-    title: "Founder and Blockchain Systems Architect",
-    period: "October 2024 — Present",
-    meta: "Seed",
-    summary: "The social market for basketball culture, settled onchain.",
-    bullets: [
-      "Building the social market for basketball culture: USDC settlement on Base, a Uniswap V4 AMM with hooks, and protocol-owned liquidity that compounds under every trade.",
-      "Presented model performance reports and product recommendations directly to the C-suite on a quarterly basis.",
-      "Developed Solidity smart contracts with Hardhat, covering deployment, verification, and hook-aware pool lifecycle management.",
-      "Ran spec, implementation, and verification phases across the full transaction flow: mint, quote, settle, holdings.",
-    ],
-    tags: ["Solidity", "Uniswap V4", "Base", "DeFi", "MLOps", "PyTorch"],
-  },
 ];
 
 export const education = [

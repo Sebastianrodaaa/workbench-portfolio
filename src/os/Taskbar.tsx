@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
 import { APPS } from "./apps/registry";
 
-type Props = {
-  menuOpen: boolean;
-  onToggleMenu: () => void;
-};
-
-export function Taskbar({ menuOpen, onToggleMenu }: Props) {
+export function Taskbar() {
   const windows = useStore((state) => state.windows);
   const zTop = useStore((state) => state.zTop);
   const focusWindow = useStore((state) => state.focusWindow);
@@ -19,16 +14,6 @@ export function Taskbar({ menuOpen, onToggleMenu }: Props) {
 
   return (
     <div className="taskbar">
-      <button
-        type="button"
-        className="taskbar-start"
-        aria-expanded={menuOpen}
-        onClick={() => onToggleMenu()}
-      >
-        {IconStartFlag}
-        Start
-      </button>
-
       <div className="task-buttons">
         {windows.map((window) => {
           const app = APPS[window.id];
@@ -72,15 +57,6 @@ export function Taskbar({ menuOpen, onToggleMenu }: Props) {
     </div>
   );
 }
-
-const IconStartFlag = (
-  <svg viewBox="0 0 13 11" className="taskbar-start-flag" aria-hidden>
-    <rect x="0" y="0" width="6" height="5" fill="#ff3b30" />
-    <rect x="7" y="0" width="6" height="5" fill="#34c759" />
-    <rect x="0" y="6" width="6" height="5" fill="#0a84ff" />
-    <rect x="7" y="6" width="6" height="5" fill="#ffd60a" />
-  </svg>
-);
 
 const IconSpeaker = (
   <svg viewBox="0 0 16 16" aria-hidden>
