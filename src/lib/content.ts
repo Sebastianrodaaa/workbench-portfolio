@@ -11,6 +11,10 @@ export const profile = {
     "Forward deployed engineer shipping local models, secure AI systems, and production ML into the real world.",
   email: "sebastian@rodaventuresllc.com",
   phone: "+1 (203) 427-5527",
+  resume: {
+    url: "/resume.pdf",
+    filename: "Sebastian_Roda_Resume.pdf",
+  },
   links: [
     {
       label: "LinkedIn",

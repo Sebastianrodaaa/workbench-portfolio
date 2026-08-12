@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { profile } from "../lib/content";
+import { click } from "../lib/audio";
+import { downloadFile } from "../lib/download";
 import { useStore, type WindowId } from "../store/useStore";
-import { APPS, DESKTOP_ORDER } from "./apps/registry";
+import { APPS, DESKTOP_ORDER, DESKTOP_SHORTCUTS } from "./apps/registry";
 import { Taskbar } from "./Taskbar";
 import { Window } from "./Window";
 
@@ -11,7 +13,7 @@ export function Desktop() {
   const openWindow = useStore((state) => state.openWindow);
   const setStage = useStore((state) => state.setStage);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selected, setSelected] = useState<WindowId | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
 
   const launch = (id: WindowId) => {
     openWindow(id);
@@ -44,6 +46,21 @@ export function Desktop() {
               </button>
             );
           })}
+          {DESKTOP_SHORTCUTS.map((shortcut) => (
+            <button
+              type="button"
+              key={shortcut.id}
+              className={`icon${selected === shortcut.id ? " selected" : ""}`}
+              onClick={() => setSelected(shortcut.id)}
+              onDoubleClick={() => {
+                click();
+                downloadFile(shortcut.url, shortcut.filename);
+              }}
+            >
+              {shortcut.icon}
+              <span>{shortcut.label}</span>
+            </button>
+          ))}
         </div>
 
         <div className="wallmark">

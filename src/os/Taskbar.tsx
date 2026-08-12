@@ -21,16 +21,11 @@ export function Taskbar({ menuOpen, onToggleMenu }: Props) {
     <div className="taskbar">
       <button
         type="button"
-        className="start"
+        className="taskbar-start"
         aria-expanded={menuOpen}
         onClick={() => onToggleMenu()}
       >
-        <span className="flag" aria-hidden>
-          <i />
-          <i />
-          <i />
-          <i />
-        </span>
+        {IconStartFlag}
         Start
       </button>
 
@@ -77,6 +72,15 @@ export function Taskbar({ menuOpen, onToggleMenu }: Props) {
     </div>
   );
 }
+
+const IconStartFlag = (
+  <svg viewBox="0 0 13 11" className="taskbar-start-flag" aria-hidden>
+    <rect x="0" y="0" width="6" height="5" fill="#ff3b30" />
+    <rect x="7" y="0" width="6" height="5" fill="#34c759" />
+    <rect x="0" y="6" width="6" height="5" fill="#0a84ff" />
+    <rect x="7" y="6" width="6" height="5" fill="#ffd60a" />
+  </svg>
+);
 
 const IconSpeaker = (
   <svg viewBox="0 0 16 16" aria-hidden>

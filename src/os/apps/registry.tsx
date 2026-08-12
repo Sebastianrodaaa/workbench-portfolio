@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
+import { profile } from "../../lib/content";
 import type { WindowId } from "../../store/useStore";
 import { About } from "./About";
 import { Work } from "./Work";
@@ -119,6 +120,49 @@ const IconInfo = (
     <rect x="12" y="21" width="8" height="2" fill="#ffffff" />
   </svg>
 );
+
+const IconResume = (
+  <svg viewBox="0 0 32 32" aria-hidden>
+    <rect x="9" y="3" width="18" height="25" fill="#ffffff" />
+    <rect x="9" y="3" width="18" height="1" fill="#c0c0c0" />
+    <rect x="9" y="3" width="1" height="25" fill="#c0c0c0" />
+    <rect x="26" y="3" width="1" height="25" fill="#808080" />
+    <rect x="9" y="27" width="18" height="1" fill="#808080" />
+    <rect x="20" y="3" width="7" height="7" fill="#c0c0c0" />
+    <rect x="20" y="3" width="7" height="1" fill="#ffffff" />
+    <rect x="26" y="3" width="1" height="7" fill="#808080" />
+    <rect x="12" y="12" width="12" height="1" fill="#000080" />
+    <rect x="12" y="15" width="10" height="1" fill="#808080" />
+    <rect x="12" y="18" width="12" height="1" fill="#808080" />
+    <rect x="12" y="21" width="8" height="1" fill="#808080" />
+    <rect x="3" y="18" width="10" height="10" fill="#c0c0c0" />
+    <rect x="3" y="18" width="10" height="1" fill="#ffffff" />
+    <rect x="3" y="18" width="1" height="10" fill="#ffffff" />
+    <rect x="12" y="27" width="1" height="1" fill="#404040" />
+    <rect x="4" y="24" width="6" height="1" fill="#000080" />
+    <rect x="5" y="22" width="1" height="3" fill="#000080" />
+    <rect x="8" y="22" width="1" height="3" fill="#000080" />
+    <rect x="6" y="20" width="2" height="1" fill="#000080" />
+  </svg>
+);
+
+export type DesktopShortcut = {
+  id: string;
+  label: string;
+  icon: ReactNode;
+  url: string;
+  filename: string;
+};
+
+export const DESKTOP_SHORTCUTS: DesktopShortcut[] = [
+  {
+    id: "resume",
+    label: "Resume.pdf",
+    icon: IconResume,
+    url: profile.resume.url,
+    filename: profile.resume.filename,
+  },
+];
 
 export const APPS: Record<WindowId, AppDefinition> = {
   about: {
