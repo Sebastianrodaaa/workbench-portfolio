@@ -1,5 +1,5 @@
 import { useRef, type PointerEvent, type ReactNode } from "react";
-import { UI_HEIGHT, UI_WIDTH } from "../lib/scene-config";
+import { UI_HEIGHT, UI_WIDTH, TASKBAR_HEIGHT } from "../lib/scene-config";
 import { useStore, type WindowId } from "../store/useStore";
 
 type Props = {
@@ -12,15 +12,22 @@ type Props = {
   width: number;
   height: number;
   minimized: boolean;
+  maximized: boolean;
   focused: boolean;
   children: ReactNode;
 };
 
-const TASKBAR_HEIGHT = 28;
-
 const GlyphMinimise = (
   <svg viewBox="0 0 8 8" aria-hidden>
     <rect x="1" y="5" width="6" height="2" fill="currentColor" />
+  </svg>
+);
+
+const GlyphRestore = (
+  <svg viewBox="0 0 8 8" aria-hidden>
+    <rect x="0" y="2" width="6" height="6" fill="currentColor" />
+    <rect x="2" y="0" width="6" height="6" fill="#c0c0c0" />
+    <rect x="2" y="0" width="6" height="6" fill="none" stroke="currentColor" strokeWidth="1" />
   </svg>
 );
 
@@ -50,6 +57,7 @@ export function Window({
   width,
   height,
   minimized,
+  maximized,
   focused,
   children,
 }: Props) {
@@ -57,6 +65,7 @@ export function Window({
   const focusWindow = useStore((state) => state.focusWindow);
   const closeWindow = useStore((state) => state.closeWindow);
   const minimizeWindow = useStore((state) => state.minimizeWindow);
+  const toggleMaximizeWindow = useStore((state) => state.toggleMaximizeWindow);
 
   const drag = useRef<{
     pointerX: number;
@@ -67,7 +76,7 @@ export function Window({
   } | null>(null);
 
   const startDrag = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0 || maximized) return;
     // Title-bar drag captures the pointer; if we start on a control button the
     // subsequent pointerup never reaches it and click never fires.
     if ((event.target as HTMLElement).closest(".win-button")) return;
@@ -109,7 +118,7 @@ export function Window({
     <section
       className={`window${focused ? " focused" : ""}${
         minimized ? " minimized" : ""
-      }`}
+      }${maximized ? " maximized" : ""}`}
       style={{ left: x, top: y, width, height, zIndex: z }}
       onPointerDown={() => focusWindow(id)}
       aria-label={title}
@@ -139,12 +148,15 @@ export function Window({
         <button
           type="button"
           className="win-button"
-          title="Maximize"
-          aria-label="Maximize"
+          title={maximized ? "Restore" : "Maximize"}
+          aria-label={maximized ? "Restore" : "Maximize"}
           onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleMaximizeWindow(id);
+          }}
         >
-          {GlyphMaximise}
+          {maximized ? GlyphRestore : GlyphMaximise}
         </button>
         <button
           type="button"

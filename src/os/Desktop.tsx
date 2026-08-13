@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { profile } from "../lib/content";
+import {
+  MAXIMIZED_WINDOW_HEIGHT,
+  UI_WIDTH,
+} from "../lib/scene-config";
 import { click } from "../lib/audio";
 import { downloadFile } from "../lib/download";
 import { useStore, type WindowId } from "../store/useStore";
@@ -67,6 +71,8 @@ export function Desktop() {
         {windows.map((window) => {
           const app = APPS[window.id];
           const Body = app.component;
+          const width = window.maximized ? UI_WIDTH : app.width;
+          const height = window.maximized ? MAXIMIZED_WINDOW_HEIGHT : app.height;
           return (
             <Window
               key={window.id}
@@ -76,9 +82,10 @@ export function Desktop() {
               x={window.x}
               y={window.y}
               z={window.z}
-              width={app.width}
-              height={app.height}
+              width={width}
+              height={height}
               minimized={window.minimized}
+              maximized={window.maximized}
               focused={window.z === zTop}
             >
               <Body />

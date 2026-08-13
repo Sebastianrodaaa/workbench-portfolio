@@ -16,6 +16,8 @@ export type WindowState = {
   y: number;
   z: number;
   minimized: boolean;
+  maximized: boolean;
+  restore?: { x: number; y: number };
 };
 
 type Store = {
@@ -42,6 +44,7 @@ type Store = {
   closeWindow: (id: WindowId) => void;
   focusWindow: (id: WindowId) => void;
   minimizeWindow: (id: WindowId) => void;
+  toggleMaximizeWindow: (id: WindowId) => void;
   moveWindow: (id: WindowId, x: number, y: number) => void;
 };
 
@@ -96,6 +99,7 @@ export const useStore = create<Store>((set, get) => ({
           y: SPAWN_ORIGIN_Y + index * SPAWN_STEP,
           z: zTop + 1,
           minimized: false,
+          maximized: false,
         },
       ],
     });
@@ -120,8 +124,34 @@ export const useStore = create<Store>((set, get) => ({
       ),
     }),
 
+  toggleMaximizeWindow: (id) =>
+    set({
+      windows: get().windows.map((w) => {
+        if (w.id !== id) return w;
+        if (w.maximized) {
+          return {
+            ...w,
+            maximized: false,
+            x: w.restore?.x ?? w.x,
+            y: w.restore?.y ?? w.y,
+            restore: undefined,
+          };
+        }
+        return {
+          ...w,
+          maximized: true,
+          restore: { x: w.x, y: w.y },
+          x: 0,
+          y: 0,
+        };
+      }),
+    }),
+
   moveWindow: (id, x, y) =>
     set({
-      windows: get().windows.map((w) => (w.id === id ? { ...w, x, y } : w)),
+      windows: get().windows.map((w) => {
+        if (w.id !== id || w.maximized) return w;
+        return { ...w, x, y };
+      }),
     }),
 }));

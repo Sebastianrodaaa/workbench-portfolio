@@ -348,6 +348,11 @@
   display: none;
 }
 
+.window.maximized {
+  padding: 2px;
+  box-shadow: none;
+}
+
 .title-bar {
   display: flex;
   align-items: center;

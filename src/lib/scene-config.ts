@@ -178,3 +178,5 @@ export const UI_HEIGHT = Math.round(
   (UI_WIDTH * MONITOR.height) / MONITOR.width,
 );
 export const UI_DISTANCE_FACTOR = (400 * MONITOR.width) / UI_WIDTH;
+export const TASKBAR_HEIGHT = 28;
+export const MAXIMIZED_WINDOW_HEIGHT = UI_HEIGHT - TASKBAR_HEIGHT;
