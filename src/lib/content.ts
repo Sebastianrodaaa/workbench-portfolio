@@ -27,9 +27,9 @@ export const profile = {
 export const about = {
   heading: "Sebastian Roda",
   paragraphs: [
-    "Multidisciplinary Project Manager and Forward Deployed Engineer working at the intersection of technology, sociology, and ontology.",
-    "Three years shipping end-to-end products — from field discovery through architecture, verification, and production deployment.",
-    "Four hackathon podiums across NYC and Paris — building agent systems under real constraints, from IBM agent orchestration to defence tech in Europe.",
+    "Multidisciplinary Project Manager &Forward Deployed Engineer working at the intersection of technology, sociology, and ontology.",
+    "Four years shipping end-to-end products across Hardware, Saas, and Blockchain domains.",
+    "Four hackathon podiums across NYC and Paris — building agentic systems under high risk and short sprint cycles, from IBM agent orchestration to defence tech in Europe.",
     "Current focus: locally hosted models and security, frontier AI, distributed systems, and machine learning — training models for complex real-world workflows, putting them into production, and automating those pipelines with AI.",
   ],
   facts: [
@@ -37,7 +37,7 @@ export const about = {
     {
       label: "Focus",
       value:
-        "Local hosting & security · frontier AI · distributed systems · production ML & automation",
+        "Local hosting & security · Computer vision · Distributed systems · Production ML & AI",
     },
     { label: "Hackathons", value: "4 podiums · NYC & Paris" },
   ],
@@ -269,12 +269,11 @@ export const readme = {
   sections: [
     {
       heading: "INTRODUCTION",
-      body: "I'm Sebastian Roda — a Forward Deployed Engineer and Project Manager based in New York. I work where product, infrastructure, and the people using the system actually meet. I don't stay at the whiteboard; I sit with users, watch where software breaks, and ship fixes that make it into production.",
+      body: "I'm Sebastian Roda — a Forward Deployed Engineer and Project Manager based in New York. I work where product, infrastructure, and the people using the system actually meet.",
     },
     {
       heading: "WHAT I BUILD",
-      body: "My focus is locally hosted models and security, frontier AI, and distributed systems. I train models for complex, real-world workflows — ingestion, feature work, training, deployment, monitoring — and automate those pipelines so they stay reliable in production. The sociology is not decoration: systems are used by people, and the ontology you pick decides what the software is able to notice.",
-    },
+      body: "My focus is on building production-ready agentic systems and machine learning pipelines for complex real-world workflows.",
     {
       heading: "RECENT FIELD WORK",
       body: "This summer I forward-deployed with Meta's product development team on the new Meta glasses launch — QA on hardware, mapping user friction, supporting production, and helping with the launch campaign. At Amazon I built an interactive Nike e-commerce production using off-axis projection, Python 3D rendering, and TouchDesigner. Through Roda Ventures I partner with teams at Meta, Amazon, and Hoka to drive the same spec → implement → verify discipline on every engagement.",
@@ -285,7 +284,7 @@ export const readme = {
     },
     {
       heading: "WHY FORWARD DEPLOYED",
-      body: "The best architecture comes from watching real users hit real constraints — then closing the loop fast enough that the field and the codebase stay aligned. That's the job: translate messy reality into systems that survive contact with it.",
+      body: "from day one I've wnanted to operate with small human teams and massive AI swarms. This "AI-native" approach companies will be able to offer the same services as legacy software, consulting, or financial firms but at a fraction of the cost. They will aggressively steal market share from heavy, bloated incumbents who are too slow to fire staff or adapt..",
     },
   ],
   quote:
