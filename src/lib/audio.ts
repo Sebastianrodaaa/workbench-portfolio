@@ -7,9 +7,9 @@ const MOUSE_CLICK_URL = "/sounds/mouse-click.mp3";
 const OFFICE_AMBIENCE_URL = "/sounds/office-ambience.mp3";
 
 const AMBIENCE_PROFILE = {
-  desk: { gain: 0.36, filterHz: 14000 },
+  desk: { gain: 5.0, filterHz: 16000 },
   /** Distant, muffled room tone while you're locked into the CRT. */
-  monitor: { gain: 0.09, filterHz: 480 },
+  monitor: { gain: 0.05, filterHz: 380 },
 } as const;
 
 let ctx: AudioContext | null = null;

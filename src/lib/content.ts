@@ -274,6 +274,7 @@ export const readme = {
     {
       heading: "WHAT I BUILD",
       body: "My focus is on building production-ready agentic systems and machine learning pipelines for complex real-world workflows.",
+    },
     {
       heading: "RECENT FIELD WORK",
       body: "This summer I forward-deployed with Meta's product development team on the new Meta glasses launch — QA on hardware, mapping user friction, supporting production, and helping with the launch campaign. At Amazon I built an interactive Nike e-commerce production using off-axis projection, Python 3D rendering, and TouchDesigner. Through Roda Ventures I partner with teams at Meta, Amazon, and Hoka to drive the same spec → implement → verify discipline on every engagement.",
@@ -284,7 +285,7 @@ export const readme = {
     },
     {
       heading: "WHY FORWARD DEPLOYED",
-      body: "from day one I've wnanted to operate with small human teams and massive AI swarms. This "AI-native" approach companies will be able to offer the same services as legacy software, consulting, or financial firms but at a fraction of the cost. They will aggressively steal market share from heavy, bloated incumbents who are too slow to fire staff or adapt..",
+      body: 'from day one I\'ve wnanted to operate with small human teams and massive AI swarms. This "AI-native" approach companies will be able to offer the same services as legacy software, consulting, or financial firms but at a fraction of the cost. They will aggressively steal market share from heavy, bloated incumbents who are too slow to fire staff or adapt..',
     },
   ],
   quote:
