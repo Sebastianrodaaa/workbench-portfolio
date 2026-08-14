@@ -8,9 +8,9 @@ const OFFICE_AMBIENCE_URL = "/sounds/office-ambience.mp3";
 const WIN95_STARTUP_URL = "/sounds/win95-startup.mp3";
 
 const AMBIENCE_PROFILE = {
-  desk: { gain: 5.0, filterHz: 16000 },
+  desk: { gain: 0.4, filterHz: 16000 },
   /** Distant, muffled room tone while you're locked into the CRT. */
-  monitor: { gain: 0.05, filterHz: 380 },
+  monitor: { gain: 0.03, filterHz: 380 },
 } as const;
 
 let ctx: AudioContext | null = null;
@@ -60,7 +60,7 @@ export function startHum() {
   osc.frequency.value = 60;
   filter.type = "lowpass";
   filter.frequency.value = 220;
-  gain.gain.value = 0.06;
+  gain.gain.value = 0.035;
   osc.connect(filter).connect(gain).connect(master);
   osc.start();
   hum = { osc, gain };
