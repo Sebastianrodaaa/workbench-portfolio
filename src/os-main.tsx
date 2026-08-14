@@ -1,6 +1,7 @@
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { UI_HEIGHT, UI_WIDTH } from "./lib/scene-config";
+import { isCompactUi } from "./lib/device";
 import { useClickSound } from "./lib/useClickSound";
 import { OS } from "./os/OS";
 import { useStore } from "./store/useStore";
@@ -13,6 +14,11 @@ function OsShell() {
   useClickSound();
   const setBooted = useStore((state) => state.setBooted);
   const setStage = useStore((state) => state.setStage);
+  const compact = isCompactUi();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("os-compact", compact);
+  }, [compact]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
@@ -30,8 +36,12 @@ function OsShell() {
 
   return (
     <div
-      className="screen-root"
-      style={{ width: UI_WIDTH, height: UI_HEIGHT }}
+      className={`screen-root${compact ? " screen-root--compact" : ""}`}
+      style={
+        compact
+          ? { width: "100%", height: "100%" }
+          : { width: UI_WIDTH, height: UI_HEIGHT }
+      }
     >
       <OS />
     </div>

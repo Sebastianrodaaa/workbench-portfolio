@@ -1,11 +1,18 @@
 export type MonitorBridgeMessage =
   | { type: "monitor-enter" }
   | { type: "monitor-leave" }
-  | { type: "os-ready" };
+  | { type: "os-ready" }
+  | { type: "request-desk" };
 
 export function postToOs(message: MonitorBridgeMessage) {
   const iframe = document.getElementById("workbench-os") as HTMLIFrameElement | null;
   iframe?.contentWindow?.postMessage(message, "*");
+}
+
+export function postToParent(message: MonitorBridgeMessage) {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage(message, "*");
+  }
 }
 
 export function onOsReady(callback: () => void) {

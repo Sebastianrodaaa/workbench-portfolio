@@ -25,15 +25,16 @@ const Effects = lazy(() =>
 
 type Props = {
   effects: boolean;
+  compact?: boolean;
   onPick?: (hit: ThreeEvent<PointerEvent>) => void;
 };
 
-export function Experience({ effects, onPick }: Props) {
+export function Experience({ effects, compact = false, onPick }: Props) {
   const toggleLamp = useStore((state) => state.toggleLamp);
 
   return (
     <Css3dBridge>
-      <Css3dSync />
+      {!compact && <Css3dSync />}
       <color attach="background" args={["#06060a"]} />
       <ambientLight intensity={1.25} />
       <directionalLight position={[2.4, 3.2, 1.8]} intensity={0.45} />
@@ -67,7 +68,7 @@ export function Experience({ effects, onPick }: Props) {
 
       <Hotspot
         position={BULB_POSITION}
-        radius={0.05}
+        radius={compact ? 0.09 : 0.05}
         label="Pull the cord"
         onSelect={() => {
           clack();
@@ -80,8 +81,8 @@ export function Experience({ effects, onPick }: Props) {
         enablePan={false}
         enableDamping
         dampingFactor={0.08}
-        rotateSpeed={0.55}
-        zoomSpeed={0.65}
+        rotateSpeed={compact ? 0.85 : 0.55}
+        zoomSpeed={compact ? 0.55 : 0.65}
         target={SHOTS.desk.target}
         {...ORBIT}
       />

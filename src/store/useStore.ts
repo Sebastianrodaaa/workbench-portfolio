@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { opensMaximized, spawnWindowPosition } from "../lib/window-spawn";
+import { isCompactUi } from "../lib/device";
 
 export type Stage = "loading" | "start" | "intro" | "desk" | "monitor";
 
@@ -84,7 +85,7 @@ export const useStore = create<Store>((set, get) => ({
     // opened after a close never lands exactly on top of an existing one.
     const index = get().spawns % 8;
     const { x, y } = spawnWindowPosition(id, index);
-    const maximized = opensMaximized(id);
+    const maximized = isCompactUi() || opensMaximized(id);
     set({
       zTop: zTop + 1,
       spawns: get().spawns + 1,

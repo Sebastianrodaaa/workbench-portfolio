@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { profile } from "../lib/content";
 import { playStartupSound, startAmbience, startHum } from "../lib/audio";
+import { useTouchUi } from "../lib/device";
 import { useStore } from "../store/useStore";
 
 const SHOWCASE_YEAR = 2026;
@@ -10,6 +11,7 @@ export function StartScreen() {
   const setStage = useStore((state) => state.setStage);
   const muted = useStore((state) => state.muted);
   const toggleMute = useStore((state) => state.toggleMute);
+  const touch = useTouchUi();
 
   const begin = useCallback(() => {
     playStartupSound();
@@ -34,7 +36,9 @@ export function StartScreen() {
         <p className="start-title">
           {profile.name} Portfolio Showcase {SHOWCASE_YEAR}
         </p>
-        <p className="start-subtitle">Click start to begin</p>
+        <p className="start-subtitle">
+          {touch ? "Tap start to begin" : "Click start to begin"}
+        </p>
         <button type="button" className="start-button" autoFocus onClick={begin}>
           START
         </button>

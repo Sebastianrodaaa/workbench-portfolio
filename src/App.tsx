@@ -3,9 +3,11 @@ import { useMemo, useState } from "react";
 import * as THREE from "three";
 import { useClickSound } from "./lib/useClickSound";
 import { useAmbience } from "./lib/useAmbience";
+import { useCompactUi } from "./lib/device";
 import { Experience } from "./three/Experience";
 import { Hud } from "./ui/Hud";
 import { LoadingScreen } from "./ui/LoadingScreen";
+import { MobileOs } from "./ui/MobileOs";
 import { StartScreen } from "./ui/StartScreen";
 import { pickCoplanarQuad, type QuadInfo } from "./lib/pick-quad";
 import { SHOTS } from "./lib/scene-config";
@@ -25,24 +27,26 @@ export default function App() {
     quad: QuadInfo | null;
   } | null>(null);
 
+  const compact = useCompactUi();
   // Coarse pointers are usually phones: skip the effect stack and cap the
   // pixel ratio harder.
   const lowPower = useMemo(
     () =>
       typeof window !== "undefined" &&
-      window.matchMedia("(pointer: coarse)").matches,
+      (window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(max-width: 820px)").matches),
     [],
   );
 
   return (
-    <div className="stage">
+    <div className={`stage${compact ? " stage--compact" : ""}`}>
       <Canvas
         flat
         shadows={false}
-        dpr={lowPower ? [1, 1.5] : [1, 2]}
+        dpr={lowPower ? [1, 1.25] : [1, 2]}
         gl={{
           powerPreference: "high-performance",
-          antialias: true,
+          antialias: !lowPower,
           alpha: false,
         }}
         camera={{
@@ -54,6 +58,7 @@ export default function App() {
       >
         <Experience
           effects={!lowPower}
+          compact={compact}
           onPick={
             debug
               ? (event) => {
@@ -79,6 +84,7 @@ export default function App() {
       </Canvas>
 
       <Hud />
+      <MobileOs />
       <LoadingScreen />
       <StartScreen />
 

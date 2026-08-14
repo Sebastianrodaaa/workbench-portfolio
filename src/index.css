@@ -8,6 +8,7 @@ html,
 body,
 #root {
   height: 100%;
+  height: 100dvh;
   margin: 0;
   background: #0b0b0e;
   color: #e7e7ea;
@@ -15,9 +16,16 @@ body,
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   overflow: hidden;
   overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
 }
 
 canvas {
   display: block;
   touch-action: none;
+}
+
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
 }

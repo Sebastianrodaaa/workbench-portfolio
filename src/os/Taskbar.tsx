@@ -5,9 +5,16 @@ import {
   Sndvol32300,
   Sndvol32302,
 } from "@react95/icons";
+import { postToParent } from "../lib/monitor-bridge";
 import { useStore } from "../store/useStore";
+import type { Stage } from "../store/useStore";
 import { APPS, DESKTOP_ORDER } from "./apps/registry";
 import { OsButton } from "./chrome/OsButton";
+
+function stepAwayFromDesk(setStage: (stage: Stage) => void) {
+  setStage("desk");
+  postToParent({ type: "request-desk" });
+}
 
 export function Taskbar() {
   const windows = useStore((state) => state.windows);
@@ -65,7 +72,7 @@ export function Taskbar() {
                   className="henry-start-menu__item"
                   onClick={() => {
                     setStartOpen(false);
-                    setStage("desk");
+                    stepAwayFromDesk(setStage);
                   }}
                 >
                   <ReaderEject variant="32x32_4" />
@@ -121,7 +128,7 @@ export function Taskbar() {
             type="button"
             title="Step away from the desk"
             aria-label="Step away from the desk"
-            onClick={() => setStage("desk")}
+            onClick={() => stepAwayFromDesk(setStage)}
           >
             <ReaderEject variant="16x16_4" />
           </button>

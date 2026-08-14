@@ -4,6 +4,7 @@ import {
   MAXIMIZED_WINDOW_HEIGHT,
   UI_WIDTH,
 } from "../lib/scene-config";
+import { isCompactUi } from "../lib/device";
 import { click } from "../lib/audio";
 import { downloadFile } from "../lib/download";
 import { useStore, type WindowId } from "../store/useStore";
@@ -29,6 +30,8 @@ export function Desktop() {
     openWindow(id);
   };
 
+  const tapOpens = isCompactUi();
+
   return (
     <div className="desktop">
       <div
@@ -46,7 +49,10 @@ export function Desktop() {
                 type="button"
                 key={id}
                 className={`icon${selected === id ? " selected" : ""}`}
-                onClick={() => setSelected(id)}
+                onClick={() => {
+                  if (tapOpens) launch(id);
+                  else setSelected(id);
+                }}
                 onDoubleClick={() => launch(id)}
               >
                 {app.icon32}
@@ -59,7 +65,12 @@ export function Desktop() {
               type="button"
               key={shortcut.id}
               className={`icon${selected === shortcut.id ? " selected" : ""}`}
-              onClick={() => setSelected(shortcut.id)}
+              onClick={() => {
+                if (tapOpens) {
+                  click();
+                  downloadFile(shortcut.url, shortcut.filename);
+                } else setSelected(shortcut.id);
+              }}
               onDoubleClick={() => {
                 click();
                 downloadFile(shortcut.url, shortcut.filename);

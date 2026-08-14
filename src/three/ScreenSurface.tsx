@@ -17,6 +17,7 @@ import {
 } from "../lib/screen-textures";
 import { useStore } from "../store/useStore";
 import { useCss3dScene } from "./Css3dRenderer";
+import { useCompactUi } from "../lib/device";
 
 const IFRAME_PADDING = 24;
 const SCREEN_Z = 0.004;
@@ -56,6 +57,7 @@ function ScreenLayer({
 
 export function ScreenSurface() {
   const cssScene = useCss3dScene();
+  const compact = useCompactUi();
   const stage = useStore((state) => state.stage);
   const setStage = useStore((state) => state.setStage);
   const setHovered = useStore((state) => state.setHovered);
@@ -83,6 +85,8 @@ export function ScreenSurface() {
   );
 
   useEffect(() => {
+    if (compact) return;
+
     const container = document.createElement("div");
     container.className = "monitor-shell";
     container.style.width = `${UI_WIDTH}px`;
@@ -131,16 +135,20 @@ export function ScreenSurface() {
       iframeRef.current = null;
       containerRef.current = null;
     };
-  }, [cssScene, worldPosition]);
+  }, [compact, cssScene, worldPosition]);
 
   useEffect(() => {
+    if (compact) {
+      prevStage.current = stage;
+      return;
+    }
     if (prevStage.current === stage) return;
     if (stage === "monitor") postToOs({ type: "monitor-enter" });
     if (prevStage.current === "monitor" && stage !== "monitor") {
       postToOs({ type: "monitor-leave" });
     }
     prevStage.current = stage;
-  }, [stage]);
+  }, [compact, stage]);
 
   useEffect(
     () =>
@@ -242,7 +250,7 @@ export function ScreenSurface() {
     <group position={MONITOR.position} rotation={MONITOR.rotation}>
       <mesh
         name="monitor-screen"
-        position={[0, 0, 0.0016]}
+        position={[0, 0, 0.0032]}
         onClick={focusMonitor}
         onPointerOver={(event) => {
           event.stopPropagation();
@@ -258,6 +266,9 @@ export function ScreenSurface() {
           map={idleTexture}
           toneMapped={false}
           side={THREE.DoubleSide}
+          polygonOffset
+          polygonOffsetFactor={-4}
+          polygonOffsetUnits={-4}
         />
       </mesh>
 
@@ -301,7 +312,7 @@ export function ScreenSurface() {
       </mesh>
 
       <EnclosingFrame depth={maxLayerOffset} />
-      <ClickPrompt show={showClickPrompt} />
+      <ClickPrompt show={showClickPrompt} label={compact ? "TAP ME" : "CLICK ME"} />
     </group>
   );
 }
@@ -337,7 +348,7 @@ function EnclosingFrame({ depth }: { depth: number }) {
 
 const skipRaycast = () => {};
 
-function ClickPrompt({ show }: { show: boolean }) {
+function ClickPrompt({ show, label }: { show: boolean; label: string }) {
   const group = useRef<THREE.Group>(null);
 
   useFrame(({ clock }, rawDelta) => {
@@ -391,7 +402,7 @@ function ClickPrompt({ show }: { show: boolean }) {
         outlineColor="#021018"
         raycast={skipRaycast}
       >
-        CLICK ME
+        {label}
       </Text>
     </group>
   );

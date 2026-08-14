@@ -1079,3 +1079,120 @@ body,
   background: var(--henry-surface);
   box-shadow: var(--henry-border-raised-outer), var(--henry-border-raised-inner);
 }
+
+/* ---------- compact / phone desktop ---------- */
+
+.os-compact,
+.os-compact body,
+.os-compact #root {
+  width: 100%;
+  height: 100%;
+  background: var(--henry-turquoise);
+}
+
+.screen-root--compact {
+  --taskbar-height: 48px;
+  font-size: 16px;
+}
+
+.screen-root--compact .henry-toolbar {
+  height: var(--taskbar-height);
+  min-height: var(--taskbar-height);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(var(--taskbar-height) + env(safe-area-inset-bottom, 0px));
+  min-height: calc(var(--taskbar-height) + env(safe-area-inset-bottom, 0px));
+}
+
+.screen-root--compact .os-window--maximized {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: calc(
+    100% - var(--taskbar-height) - env(safe-area-inset-bottom, 0px)
+  ) !important;
+}
+
+.screen-root--compact .os-window__titlebar {
+  height: 36px;
+  cursor: default;
+}
+
+.screen-root--compact .os-button--compact .os-button__inner {
+  min-width: 32px;
+  min-height: 28px;
+  font-size: 16px;
+}
+
+.screen-root--compact .icon {
+  width: 88px;
+  padding: 8px 4px;
+}
+
+.screen-root--compact .icon span {
+  font-size: 12px;
+}
+
+.screen-root--compact .henry-start-menu {
+  width: min(280px, calc(100vw - 12px));
+}
+
+.screen-root--compact .henry-start-menu__item {
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.screen-root--compact .henry-toolbar__tabs {
+  overflow-x: auto;
+}
+
+.screen-root--compact .henry-task-tab {
+  min-height: 36px;
+  max-width: 140px;
+}
+
+.screen-root--compact .work {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+.screen-root--compact .work-list {
+  max-height: 132px;
+  overflow: hidden;
+}
+
+.screen-root--compact .work-list .os-inset__body {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.screen-root--compact .work-list li {
+  flex: none;
+}
+
+.screen-root--compact .work-list button {
+  min-width: 120px;
+  padding: 10px 12px;
+}
+
+.screen-root--compact .about-hero__title {
+  font-size: 22px;
+}
+
+.screen-root--compact .about-hero__subtitle {
+  font-size: 15px;
+}
+
+.screen-root--compact h3 {
+  font-size: 20px;
+}
+
+.screen-root--compact .project-demo {
+  max-height: 220px;
+}
+
+.screen-root--compact .os-panel,
+.screen-root--compact .projects,
+.screen-root--compact .work-detail {
+  -webkit-overflow-scrolling: touch;
+}

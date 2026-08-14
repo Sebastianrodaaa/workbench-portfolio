@@ -20,6 +20,8 @@ type Options = {
    * out fully metallic, which renders black against this room's tiny env map.
    */
   maxMetalness?: number;
+  /** Skip color tint — glow sprites go black over the CRT if darkened. */
+  skip?: (material: THREE.Material) => boolean;
 };
 
 /**
@@ -28,7 +30,12 @@ type Options = {
  */
 export function useLampTint(
   root: THREE.Object3D,
-  { envMapIntensity = 0.35, roughnessBoost = 0.15, maxMetalness = 1 }: Options = {},
+  {
+    envMapIntensity = 0.35,
+    roughnessBoost = 0.15,
+    maxMetalness = 1,
+    skip,
+  }: Options = {},
 ): RefObject<number> {
   const level = useRef(1);
 
@@ -43,7 +50,7 @@ export function useLampTint(
         : [child.material];
 
       for (const material of materials) {
-        if (!material || seen.has(material)) continue;
+        if (!material || seen.has(material) || skip?.(material)) continue;
         seen.add(material);
         if (material instanceof THREE.MeshStandardMaterial) {
           material.envMapIntensity = envMapIntensity;
@@ -58,7 +65,7 @@ export function useLampTint(
     });
 
     return found;
-  }, [root, envMapIntensity, roughnessBoost, maxMetalness]);
+  }, [root, envMapIntensity, roughnessBoost, maxMetalness, skip]);
 
   useFrame((_, rawDelta) => {
     const delta = Math.min(rawDelta, 1 / 30);
