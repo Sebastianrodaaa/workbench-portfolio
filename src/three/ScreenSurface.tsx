@@ -1,4 +1,3 @@
-import { Text } from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 import * as THREE from "three";
@@ -11,6 +10,7 @@ import {
   surfaceNormal,
 } from "../lib/scene-config";
 import {
+  createClickPromptTexture,
   createIdleScreenTexture,
   createShadowTexture,
   createSmudgeTexture,
@@ -263,8 +263,9 @@ export function ScreenSurface() {
         <meshBasicMaterial
           ref={idleMatRef}
           map={idleTexture}
+          transparent
           toneMapped={false}
-          side={THREE.DoubleSide}
+          side={THREE.FrontSide}
           polygonOffset
           polygonOffsetFactor={-4}
           polygonOffsetUnits={-4}
@@ -348,61 +349,57 @@ function EnclosingFrame({ depth }: { depth: number }) {
 const skipRaycast = () => {};
 
 function ClickPrompt({ show, label }: { show: boolean; label: string }) {
-  const group = useRef<THREE.Group>(null);
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const opacity = useRef(0);
+  const worldPos = useRef(new THREE.Vector3());
+  const worldNormal = useRef(new THREE.Vector3());
+  const toCamera = useRef(new THREE.Vector3());
+  const texture = useMemo(() => createClickPromptTexture(label), [label]);
 
-  useFrame(({ clock }, rawDelta) => {
-    const root = group.current;
-    if (!root) return;
+  useEffect(() => () => texture.dispose(), [texture]);
+
+  useFrame(({ camera, clock }, rawDelta) => {
+    const material = materialRef.current;
+    const mesh = meshRef.current;
+    if (!material || !mesh) return;
     const delta = Math.min(rawDelta, 1 / 30);
-    const blink = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(clock.elapsedTime * 2.5));
-    const next = THREE.MathUtils.damp(root.scale.x, show ? 1 : 0, 10, delta);
-    root.scale.setScalar(next);
-    root.visible = next > 0.04;
 
-    root.traverse((obj) => {
-      const mesh = obj as THREE.Mesh;
-      if (!mesh.isMesh) return;
-      const mat = mesh.material;
-      if (!mat || Array.isArray(mat) || !("opacity" in mat)) return;
-      mat.transparent = true;
-      mat.depthWrite = false;
-      mat.opacity = next * (mesh === root.children[0] ? 0.78 : blink);
-    });
+    mesh.getWorldPosition(worldPos.current);
+    mesh.getWorldDirection(worldNormal.current);
+    toCamera.current.copy(camera.position).sub(worldPos.current).normalize();
+    const facing = worldNormal.current.dot(toCamera.current);
+    const pulse = 0.88 + 0.12 * (0.5 + 0.5 * Math.sin(clock.elapsedTime * 2.1));
+    // Hide when the tube is edge-on or behind something; depth test covers the rest.
+    const target = show && facing > 0.42 ? pulse : 0;
 
-    const label = root.children[1] as {
-      fillOpacity?: number;
-      outlineOpacity?: number;
-    };
-    if (label.fillOpacity != null) {
-      label.fillOpacity = next * blink;
-      label.outlineOpacity = next * blink;
-    }
+    opacity.current = THREE.MathUtils.damp(opacity.current, target, 8, delta);
+    material.opacity = opacity.current;
+    mesh.visible = opacity.current > 0.02;
   });
 
   return (
-    <group ref={group} position={[0, 0, 0.0028]} visible={false}>
-      <mesh raycast={skipRaycast}>
-        <planeGeometry args={[0.28, 0.078]} />
-        <meshBasicMaterial
-          color="#07141c"
-          transparent
-          opacity={0}
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </mesh>
-      <Text
-        fontSize={0.032}
-        color="#e8fbff"
-        anchorX="center"
-        anchorY="middle"
-        letterSpacing={0.1}
-        outlineWidth={0.0016}
-        outlineColor="#021018"
-        raycast={skipRaycast}
-      >
-        {label}
-      </Text>
-    </group>
+    <mesh
+      ref={meshRef}
+      position={[0, 0, 0.008]}
+      renderOrder={8}
+      visible={false}
+      raycast={skipRaycast}
+    >
+      <planeGeometry args={[0.32, 0.1]} />
+      <meshBasicMaterial
+        ref={materialRef}
+        map={texture}
+        transparent
+        opacity={0}
+        depthTest
+        depthWrite={false}
+        toneMapped={false}
+        polygonOffset
+        polygonOffsetFactor={-4}
+        polygonOffsetUnits={-4}
+        side={THREE.FrontSide}
+      />
+    </mesh>
   );
 }

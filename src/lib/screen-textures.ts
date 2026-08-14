@@ -39,6 +39,37 @@ export function createIdleScreenTexture() {
   });
 }
 
+/** Plaque drawn onto a quad so we never scale Troika SDF text. */
+export function createClickPromptTexture(label: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 160;
+  const ctx = canvas.getContext("2d")!;
+  const w = canvas.width;
+  const h = canvas.height;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "rgba(7, 20, 28, 0.9)";
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "rgba(232, 251, 255, 0.4)";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(8, 8, w - 16, h - 16);
+
+  ctx.font = `700 72px "Lucida Console", ui-monospace, monospace`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#e8fbff";
+  ctx.fillText(label, w * 0.5, h * 0.52);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  return texture;
+}
+
 /** Fingerprints and glass grime, similar to Henry's smudge layer. */
 export function createSmudgeTexture() {
   return canvasTexture((ctx, w, h) => {
