@@ -1,179 +1,398 @@
-import { Html } from "@react-three/drei";
+import { Text } from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, type RefObject } from "react";
 import * as THREE from "three";
+import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
+import { postToOs, onOsReady } from "../lib/monitor-bridge";
 import {
   MONITOR,
-  UI_DISTANCE_FACTOR,
   UI_HEIGHT,
   UI_WIDTH,
   surfaceNormal,
 } from "../lib/scene-config";
+import {
+  createIdleScreenTexture,
+  createShadowTexture,
+  createSmudgeTexture,
+} from "../lib/screen-textures";
 import { useStore } from "../store/useStore";
-import { OS } from "../os/OS";
+import { useCss3dScene } from "./Css3dRenderer";
 
-const vertexShader = /* glsl */ `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
+const IFRAME_PADDING = 24;
+const SCREEN_Z = 0.004;
+const LAYER_SCALE = 0.0011;
 
-/**
- * Stand-in phosphor glow. The DOM interface renders on top of this quad, so
- * mostly what you see of it is the bloom halo bleeding past the bezel.
- */
-const fragmentShader = /* glsl */ `
-  uniform float uTime;
-  uniform float uPower;
-  varying vec2 vUv;
+type ScreenLayerProps = {
+  texture: THREE.Texture;
+  opacity: number;
+  offset: number;
+  blending?: THREE.Blending;
+  materialRef?: RefObject<THREE.MeshBasicMaterial | null>;
+};
 
-  float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-  }
-
-  void main() {
-    vec2 uv = vUv;
-
-    // Bright enough that the tube reads as powered from across the room, where
-    // the DOM interface is not yet drawn over it. Cool grey, not phosphor: the
-    // desktop drawn on top of this is Windows teal.
-    vec3 base = mix(vec3(0.045, 0.085, 0.105), vec3(0.10, 0.19, 0.24), uv.y);
-    float scan = 0.5 + 0.5 * sin((uv.y * 620.0) - uTime * 5.0);
-    base += scan * 0.06;
-
-    float grain = hash(floor(uv * vec2(260.0, 200.0)) + floor(uTime * 24.0));
-    base += (grain - 0.5) * 0.035;
-
-    vec2 centred = uv - 0.5;
-    float vignette = smoothstep(0.85, 0.16, length(centred * vec2(1.05, 1.2)));
-    base *= 0.35 + vignette * 0.9;
-
-    float flicker = 0.97 + 0.03 * sin(uTime * 41.0) * sin(uTime * 7.3);
-
-    // Power-on wipe: a bright band opens out from the middle of the tube.
-    float open = smoothstep(0.0, 0.55, uPower);
-    float band = smoothstep(open, open - 0.06, abs(centred.y) * 2.0);
-    float warm = smoothstep(0.45, 1.0, uPower);
-
-    vec3 colour = base * flicker * band;
-    colour += vec3(0.55, 0.78, 0.95) * (1.0 - warm) * band * 0.5;
-
-    gl_FragColor = vec4(colour, 1.0);
-    #include <colorspace_fragment>
-  }
-`;
+function ScreenLayer({
+  texture,
+  opacity,
+  offset,
+  blending = THREE.NormalBlending,
+  materialRef,
+}: ScreenLayerProps) {
+  return (
+    <mesh position={[0, 0, offset]} renderOrder={4}>
+      <planeGeometry args={[MONITOR.width, MONITOR.height]} />
+      <meshBasicMaterial
+        ref={materialRef}
+        map={texture}
+        transparent
+        opacity={opacity}
+        blending={blending}
+        depthWrite={false}
+        toneMapped={false}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
+}
 
 export function ScreenSurface() {
+  const cssScene = useCss3dScene();
   const stage = useStore((state) => state.stage);
   const setStage = useStore((state) => state.setStage);
   const setHovered = useStore((state) => state.setHovered);
 
-  const uiRef = useRef<HTMLDivElement>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
-  const opacity = useRef(0);
-  const power = useRef(0);
+  const idleMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const shadowMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const smudgeMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const dimmerRef = useRef<THREE.MeshBasicMaterial>(null);
+  const cssObjectRef = useRef<CSS3DObject | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const uiOpacity = useRef(0);
+  const overlayStrength = useRef(0);
+  const prevStage = useRef(stage);
 
-  const uniforms = useMemo(
-    () => ({ uTime: { value: 0 }, uPower: { value: 0 } }),
-    [],
-  );
+  const idleTexture = useMemo(() => createIdleScreenTexture(), []);
+  const smudgeTexture = useMemo(() => createSmudgeTexture(), []);
+  const shadowTexture = useMemo(() => createShadowTexture(), []);
 
   const normal = useMemo(() => surfaceNormal(MONITOR), []);
   const worldPosition = useMemo(
-    () => new THREE.Vector3(...MONITOR.position),
+    () =>
+      new THREE.Vector3(...MONITOR.position).addScaledVector(normal, SCREEN_Z),
+    [normal],
+  );
+
+  useEffect(() => {
+    const container = document.createElement("div");
+    container.className = "monitor-shell";
+    container.style.width = `${UI_WIDTH}px`;
+    container.style.height = `${UI_HEIGHT}px`;
+    container.style.opacity = "0";
+    container.style.background = "transparent";
+    container.style.pointerEvents = "none";
+
+    const iframe = document.createElement("iframe");
+    iframe.id = "workbench-os";
+    iframe.title = "Workbench desktop";
+    iframe.src = new URL("/os.html", window.location.href).href;
+    iframe.className = "monitor-jitter";
+    iframe.frameBorder = "0";
+    iframe.loading = "eager";
+    iframe.style.width = `${UI_WIDTH}px`;
+    iframe.style.height = `${UI_HEIGHT}px`;
+    iframe.style.padding = `${IFRAME_PADDING}px`;
+    iframe.style.boxSizing = "border-box";
+    iframe.style.border = "0";
+    iframe.style.background = "#008080";
+    iframe.addEventListener("load", () => {
+      if (useStore.getState().stage === "monitor") {
+        postToOs({ type: "monitor-enter" });
+      }
+    });
+    container.appendChild(iframe);
+
+    const object = new CSS3DObject(container);
+    object.position.copy(worldPosition);
+    object.rotation.set(...MONITOR.rotation);
+    object.scale.set(
+      MONITOR.width / UI_WIDTH,
+      MONITOR.height / UI_HEIGHT,
+      1,
+    );
+
+    cssScene.add(object);
+    cssObjectRef.current = object;
+    iframeRef.current = iframe;
+    containerRef.current = container;
+
+    return () => {
+      cssScene.remove(object);
+      cssObjectRef.current = null;
+      iframeRef.current = null;
+      containerRef.current = null;
+    };
+  }, [cssScene, worldPosition]);
+
+  useEffect(() => {
+    if (prevStage.current === stage) return;
+    if (stage === "monitor") postToOs({ type: "monitor-enter" });
+    if (prevStage.current === "monitor" && stage !== "monitor") {
+      postToOs({ type: "monitor-leave" });
+    }
+    prevStage.current = stage;
+  }, [stage]);
+
+  useEffect(
+    () =>
+      onOsReady(() => {
+        if (useStore.getState().stage === "monitor") {
+          postToOs({ type: "monitor-enter" });
+        }
+      }),
     [],
   );
-  const toCamera = useMemo(() => new THREE.Vector3(), []);
+
+  useEffect(
+    () => () => {
+      idleTexture.dispose();
+      smudgeTexture.dispose();
+      shadowTexture.dispose();
+    },
+    [idleTexture, shadowTexture, smudgeTexture],
+  );
 
   useFrame(({ camera }, rawDelta) => {
     const delta = Math.min(rawDelta, 1 / 30);
+    const engaged = stage === "monitor";
 
-    const on = stage !== "loading" && stage !== "start";
-    power.current = THREE.MathUtils.damp(power.current, on ? 1 : 0, 1.6, delta);
+    const container = containerRef.current;
+    if (container) {
+      const toCamera = new THREE.Vector3()
+        .subVectors(camera.position, worldPosition)
+        .normalize();
+      const facing = toCamera.dot(normal);
+      const wanted =
+        engaged && facing > 0.35 ? Math.min(1, (facing - 0.35) * 5) : 0;
+      uiOpacity.current = THREE.MathUtils.damp(
+        uiOpacity.current,
+        wanted,
+        10,
+        delta,
+      );
 
-    // Read the uniforms off the live material: the object handed to the
-    // `uniforms` prop is not necessarily the one the material ends up holding.
-    const live = materialRef.current?.uniforms;
-    if (live) {
-      live.uTime.value += delta;
-      live.uPower.value = power.current;
+      const next = uiOpacity.current;
+      container.style.opacity = String(next);
+      container.style.visibility = next < 0.04 ? "hidden" : "visible";
+      container.style.pointerEvents = engaged && next > 0.35 ? "auto" : "none";
     }
 
-    const element = uiRef.current;
-    if (!element) return;
+    overlayStrength.current = THREE.MathUtils.damp(
+      overlayStrength.current,
+      engaged ? uiOpacity.current : 0,
+      10,
+      delta,
+    );
+    const overlays = overlayStrength.current;
 
-    // Only paint the DOM desktop once you are seated at the monitor. Leaving it
-    // visible while orbiting at the desk makes the CSS3D layer shear and flicker,
-    // especially along the bottom edge / taskbar.
-    toCamera.subVectors(camera.position, worldPosition).normalize();
-    const facing = toCamera.dot(normal);
-    const showUi = stage === "monitor";
-    const wanted =
-      showUi && facing > 0.35 ? Math.min(1, (facing - 0.35) * 5) : 0;
-    const next = THREE.MathUtils.damp(opacity.current, wanted, 10, delta);
+    const idleMat = idleMatRef.current;
+    if (idleMat) {
+      idleMat.opacity = THREE.MathUtils.damp(
+        idleMat.opacity,
+        engaged ? 0 : 1,
+        12,
+        delta,
+      );
+    }
 
-    opacity.current = next;
-    element.style.opacity = String(next);
-    element.style.visibility = next < 0.04 ? "hidden" : "visible";
+    const shadowMat = shadowMatRef.current;
+    if (shadowMat) shadowMat.opacity = overlays * 0.38;
+
+    const smudgeMat = smudgeMatRef.current;
+    if (smudgeMat) smudgeMat.opacity = overlays * 0.1;
+
+    const dimmer = dimmerRef.current;
+    if (dimmer) {
+      if (engaged) {
+        const view = new THREE.Vector3()
+          .subVectors(camera.position, worldPosition)
+          .normalize();
+        const facing = Math.max(view.dot(normal), 0);
+        const distance = camera.position.distanceTo(worldPosition);
+        const distanceFactor = 1 / (distance / 2.4);
+        dimmer.opacity =
+          ((1 - Math.min(1, distanceFactor)) * 0.35 + (1 - facing) * 0.28) *
+          overlays;
+      } else {
+        dimmer.opacity = THREE.MathUtils.damp(dimmer.opacity, 0, 12, delta);
+      }
+    }
   });
 
   const focusMonitor = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
-    if (stage === "desk") {
+    if (stage === "desk" || stage === "intro") {
       setStage("monitor");
     }
   };
 
+  const showClickPrompt = stage === "intro" || stage === "desk";
+  const maxLayerOffset = 10 * LAYER_SCALE;
+
   return (
     <group position={MONITOR.position} rotation={MONITOR.rotation}>
       <mesh
-        name="crt-screen"
+        name="monitor-screen"
         position={[0, 0, 0.0016]}
         onClick={focusMonitor}
         onPointerOver={(event) => {
           event.stopPropagation();
-          if (stage === "desk") setHovered("Sit down at the machine");
+          if (stage === "desk" || stage === "intro") {
+            setHovered("Click me — sit down at the big monitor");
+          }
         }}
         onPointerOut={() => setHovered(null)}
       >
-        <planeGeometry args={[MONITOR.width, MONITOR.height]} />
-        <shaderMaterial
-          ref={materialRef}
-          vertexShader={vertexShader}
-          fragmentShader={fragmentShader}
-          uniforms={uniforms}
+        <planeGeometry args={[MONITOR.width, MONITOR.height, 24, 18]} />
+        <meshBasicMaterial
+          ref={idleMatRef}
+          map={idleTexture}
           toneMapped={false}
+          side={THREE.DoubleSide}
         />
       </mesh>
 
-      <Html
-        transform
-        distanceFactor={UI_DISTANCE_FACTOR}
-        position={[0, 0, 0.004]}
-        zIndexRange={[8, 0]}
-        occlude={false}
-        wrapperClass="screen-wrapper"
-        // drei puts this on its own wrapper div; without it the panel keeps
-        // eating scene clicks even when our own root is inert.
-        pointerEvents={stage === "monitor" ? "auto" : "none"}
+      {/* WebGL hole so desk geometry can occlude the CSS3D desktop. */}
+      <mesh position={[0, 0, SCREEN_Z - 0.0004]}>
+        <planeGeometry args={[MONITOR.width, MONITOR.height]} />
+        <meshLambertMaterial
+          transparent
+          opacity={0}
+          blending={THREE.NoBlending}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      <ScreenLayer
+        texture={shadowTexture}
+        opacity={0}
+        offset={4 * LAYER_SCALE}
+        materialRef={shadowMatRef}
+      />
+      <ScreenLayer
+        texture={smudgeTexture}
+        opacity={0}
+        offset={6 * LAYER_SCALE}
+        blending={THREE.AdditiveBlending}
+        materialRef={smudgeMatRef}
+      />
+
+      <mesh position={[0, 0, maxLayerOffset - 0.0002]}>
+        <planeGeometry args={[MONITOR.width, MONITOR.height]} />
+        <meshBasicMaterial
+          ref={dimmerRef}
+          color="#000000"
+          transparent
+          opacity={0}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      <EnclosingFrame depth={maxLayerOffset} />
+      <ClickPrompt show={showClickPrompt} />
+    </group>
+  );
+}
+
+function EnclosingFrame({ depth }: { depth: number }) {
+  const halfW = MONITOR.width / 2;
+  const halfH = MONITOR.height / 2;
+  const material = (
+    <meshBasicMaterial color="#2a2b26" toneMapped={false} side={THREE.DoubleSide} />
+  );
+
+  return (
+    <>
+      <mesh position={[-halfW, 0, depth / 2]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[depth, MONITOR.height]} />
+        {material}
+      </mesh>
+      <mesh position={[halfW, 0, depth / 2]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[depth, MONITOR.height]} />
+        {material}
+      </mesh>
+      <mesh position={[0, halfH, depth / 2]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[MONITOR.width, depth]} />
+        {material}
+      </mesh>
+      <mesh position={[0, -halfH, depth / 2]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[MONITOR.width, depth]} />
+        {material}
+      </mesh>
+    </>
+  );
+}
+
+const skipRaycast = () => {};
+
+function ClickPrompt({ show }: { show: boolean }) {
+  const group = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }, rawDelta) => {
+    const root = group.current;
+    if (!root) return;
+    const delta = Math.min(rawDelta, 1 / 30);
+    const blink = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(clock.elapsedTime * 2.5));
+    const next = THREE.MathUtils.damp(root.scale.x, show ? 1 : 0, 10, delta);
+    root.scale.setScalar(next);
+    root.visible = next > 0.04;
+
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const mat = mesh.material;
+      if (!mat || Array.isArray(mat) || !("opacity" in mat)) return;
+      mat.transparent = true;
+      mat.depthWrite = false;
+      mat.opacity = next * (mesh === root.children[0] ? 0.78 : blink);
+    });
+
+    const label = root.children[1] as {
+      fillOpacity?: number;
+      outlineOpacity?: number;
+    };
+    if (label.fillOpacity != null) {
+      label.fillOpacity = next * blink;
+      label.outlineOpacity = next * blink;
+    }
+  });
+
+  return (
+    <group ref={group} position={[0, 0, 0.0028]} visible={false}>
+      <mesh raycast={skipRaycast}>
+        <planeGeometry args={[0.28, 0.078]} />
+        <meshBasicMaterial
+          color="#07141c"
+          transparent
+          opacity={0}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+      <Text
+        fontSize={0.032}
+        color="#e8fbff"
+        anchorX="center"
+        anchorY="middle"
+        letterSpacing={0.1}
+        outlineWidth={0.0016}
+        outlineColor="#021018"
+        raycast={skipRaycast}
       >
-        <div
-          ref={uiRef}
-          className="screen-root"
-          style={{
-            width: UI_WIDTH,
-            height: UI_HEIGHT,
-            opacity: 0,
-            // Driven by React, not the render loop: a stalled frame loop must
-            // never leave the panel swallowing clicks meant for the scene.
-            pointerEvents: stage === "monitor" ? "auto" : "none",
-          }}
-        >
-          <OS />
-        </div>
-      </Html>
+        CLICK ME
+      </Text>
     </group>
   );
 }

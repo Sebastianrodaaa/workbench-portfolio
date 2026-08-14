@@ -1,89 +1,136 @@
-import { useEffect, useState } from "react";
+import { cloneElement, useEffect, useRef, useState } from "react";
+import {
+  Logo,
+  ReaderEject,
+  Sndvol32300,
+  Sndvol32302,
+} from "@react95/icons";
 import { useStore } from "../store/useStore";
-import { APPS } from "./apps/registry";
+import { APPS, DESKTOP_ORDER } from "./apps/registry";
+import { OsButton } from "./chrome/OsButton";
 
 export function Taskbar() {
   const windows = useStore((state) => state.windows);
   const zTop = useStore((state) => state.zTop);
   const focusWindow = useStore((state) => state.focusWindow);
   const minimizeWindow = useStore((state) => state.minimizeWindow);
+  const openWindow = useStore((state) => state.openWindow);
   const muted = useStore((state) => state.muted);
   const toggleMute = useStore((state) => state.toggleMute);
   const setStage = useStore((state) => state.setStage);
   const clock = useClock();
+  const [startOpen, setStartOpen] = useState(false);
+  const startRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!startOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (startRef.current?.contains(event.target as Node)) return;
+      setStartOpen(false);
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => window.removeEventListener("pointerdown", onPointerDown);
+  }, [startOpen]);
 
   return (
-    <div className="taskbar">
-      <div className="task-buttons">
-        {windows.map((window) => {
-          const app = APPS[window.id];
-          const active = !window.minimized && window.z === zTop;
-          return (
-            <button
-              type="button"
-              key={window.id}
-              className={`task-button${active ? " active" : ""}`}
-              onClick={() => {
-                if (active) minimizeWindow(window.id);
-                else focusWindow(window.id);
-              }}
-            >
-              {app.icon}
-              <span>{app.label}</span>
-            </button>
-          );
-        })}
-      </div>
+    <footer className="henry-toolbar">
+      <div className="henry-toolbar__inner">
+        <div className="henry-toolbar__start" ref={startRef}>
+          {startOpen && (
+            <div className="henry-start-menu">
+              <div className="henry-start-menu__sidebar" aria-hidden>
+                Workbench
+              </div>
+              <div className="henry-start-menu__items">
+                {DESKTOP_ORDER.map((id) => {
+                  const app = APPS[id];
+                  return (
+                    <button
+                      type="button"
+                      key={id}
+                      className="henry-start-menu__item"
+                      onClick={() => {
+                        openWindow(id);
+                        setStartOpen(false);
+                      }}
+                    >
+                      {cloneElement(app.icon32)}
+                      <span>{app.label}</span>
+                    </button>
+                  );
+                })}
+                <div className="henry-start-menu__rule" />
+                <button
+                  type="button"
+                  className="henry-start-menu__item"
+                  onClick={() => {
+                    setStartOpen(false);
+                    setStage("desk");
+                  }}
+                >
+                  <ReaderEject variant="32x32_4" />
+                  <span>Step away...</span>
+                </button>
+              </div>
+            </div>
+          )}
+          <OsButton
+            className="henry-start-button"
+            onClick={() => setStartOpen((open) => !open)}
+          >
+            <Logo variant="16x16_4" />
+            Start
+          </OsButton>
+        </div>
 
-      <div className="tray">
-        <button
-          type="button"
-          title={muted ? "Sound: off" : "Sound: on"}
-          aria-label={muted ? "Turn sound on" : "Turn sound off"}
-          onClick={() => toggleMute()}
-        >
-          {muted ? IconSpeakerMuted : IconSpeaker}
-        </button>
-        <button
-          type="button"
-          title="Step away from the desk"
-          aria-label="Step away from the desk"
-          onClick={() => setStage("desk")}
-        >
-          {IconEject}
-        </button>
-        <span className="clock">{clock}</span>
+        <div className="henry-toolbar__tabs">
+          {windows.map((window) => {
+            const app = APPS[window.id];
+            const active = !window.minimized && window.z === zTop;
+            return (
+              <button
+                type="button"
+                key={window.id}
+                className={`henry-task-tab${active ? " henry-task-tab--active" : ""}`}
+                onClick={() => {
+                  if (active) minimizeWindow(window.id);
+                  else focusWindow(window.id);
+                }}
+              >
+                {cloneElement(app.icon16)}
+                <span>{app.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="henry-toolbar__tray">
+          <button
+            type="button"
+            title={muted ? "Sound: off" : "Sound: on"}
+            aria-label={muted ? "Turn sound on" : "Turn sound off"}
+            onClick={() => toggleMute()}
+          >
+            {muted ? (
+              <Sndvol32302 variant="32x32_4" />
+            ) : (
+              <Sndvol32300 variant="16x16_4" />
+            )}
+          </button>
+          <button
+            type="button"
+            title="Step away from the desk"
+            aria-label="Step away from the desk"
+            onClick={() => setStage("desk")}
+          >
+            <ReaderEject variant="16x16_4" />
+          </button>
+          <span className="henry-toolbar__clock">{clock}</span>
+        </div>
       </div>
-    </div>
+    </footer>
   );
 }
-
-const IconSpeaker = (
-  <svg viewBox="0 0 16 16" aria-hidden>
-    <rect x="2" y="6" width="2" height="4" fill="#404040" />
-    <path d="M4 6h2V4h1v8H6v-2H4z" fill="#404040" />
-    <rect x="9" y="5" width="1" height="6" fill="#000080" />
-    <rect x="11" y="3" width="1" height="10" fill="#000080" />
-  </svg>
-);
-
-const IconSpeakerMuted = (
-  <svg viewBox="0 0 16 16" aria-hidden>
-    <rect x="2" y="6" width="2" height="4" fill="#808080" />
-    <path d="M4 6h2V4h1v8H6v-2H4z" fill="#808080" />
-    <path
-      d="M9 5h1v1h1v1h1V6h1V5h1v1h-1v1h-1v1h1v1h1v1h-1v1h-1v-1h-1V9h-1v1H9V9h1V8h1V7h-1V6H9z"
-      fill="#c00000"
-    />
-  </svg>
-);
-
-const IconEject = (
-  <svg viewBox="0 0 16 16" aria-hidden>
-    <rect x="2" y="11" width="12" height="2" fill="#404040" />
-    <path d="M8 3l5 6H3z" fill="#000080" />
-  </svg>
-);
 
 function useClock() {
   const [now, setNow] = useState(() => format(new Date()));
@@ -95,7 +142,10 @@ function useClock() {
 }
 
 function format(date: Date) {
-  return date
-    .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    .replace(/\s/g, " ");
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const amPm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  const mins = minutes < 10 ? `0${minutes}` : String(minutes);
+  return `${hours}:${mins} ${amPm}`;
 }

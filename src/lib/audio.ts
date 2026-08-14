@@ -5,6 +5,7 @@
 
 const MOUSE_CLICK_URL = "/sounds/mouse-click.mp3";
 const OFFICE_AMBIENCE_URL = "/sounds/office-ambience.mp3";
+const WIN95_STARTUP_URL = "/sounds/win95-startup.mp3";
 
 const AMBIENCE_PROFILE = {
   desk: { gain: 5.0, filterHz: 16000 },
@@ -17,6 +18,8 @@ let master: GainNode | null = null;
 let hum: { osc: OscillatorNode; gain: GainNode } | null = null;
 let mouseClickBuffer: AudioBuffer | null = null;
 let mouseClickLoading: Promise<AudioBuffer> | null = null;
+let startupBuffer: AudioBuffer | null = null;
+let startupLoading: Promise<AudioBuffer> | null = null;
 let ambienceBuffer: AudioBuffer | null = null;
 let ambienceLoading: Promise<AudioBuffer> | null = null;
 let ambiencePendingFocus: boolean | null = null;
@@ -113,6 +116,46 @@ export function preloadMouseClick() {
   void loadMouseClickBuffer().catch(() => {
     mouseClickLoading = null;
   });
+}
+
+function loadStartupBuffer() {
+  if (startupBuffer) return Promise.resolve(startupBuffer);
+  if (startupLoading) return startupLoading;
+
+  startupLoading = (async () => {
+    const { ctx } = context();
+    const response = await fetch(WIN95_STARTUP_URL);
+    if (!response.ok) throw new Error(`Failed to load ${WIN95_STARTUP_URL}`);
+    const data = await response.arrayBuffer();
+    startupBuffer = await ctx.decodeAudioData(data);
+    return startupBuffer;
+  })();
+
+  return startupLoading;
+}
+
+/** Decode early so START plays without waiting on the fetch. */
+export function preloadStartupSound() {
+  void loadStartupBuffer().catch(() => {
+    startupLoading = null;
+  });
+}
+
+/** Windows 95 startup jingle — plays when the user hits START. */
+export function playStartupSound() {
+  const { ctx, master } = context();
+  void loadStartupBuffer()
+    .then((buffer) => {
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.85;
+      source.connect(gain).connect(master);
+      source.start();
+    })
+    .catch(() => {
+      startupLoading = null;
+    });
 }
 
 /** Sampled mouse click, routed through the master bus so mute works. */

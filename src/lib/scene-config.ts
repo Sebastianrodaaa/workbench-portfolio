@@ -58,21 +58,12 @@ const ZYN = "/models/props/zyn.glb";
  */
 export const PROPS: PropPlacement[] = [
   {
-    // Bare bench beside the mouse: the mouse ends at z -0.27, the fan starts at
-    // z -0.62, and the bench lip rolls off past x 0.37.
-    id: "ashtray",
-    url: "/models/props/ashtray.glb",
-    position: [0.19, DESK_PROP_Y, -0.47],
-    size: 0.45,
-    spin: 0.35,
-  },
-  {
     id: "monster-1",
     url: MONSTER,
     position: [0.31, DESK_PROP_Y, 0.09],
     size: 0.168,
     fit: "height",
-    spin: -0.4,
+    spin: -5.0,
   },
   {
     id: "monster-3",
@@ -80,7 +71,7 @@ export const PROPS: PropPlacement[] = [
     position: [-0.24, DESK_PROP_Y, 0.39],
     size: 0.158,
     fit: "height",
-    spin: 0.35,
+    spin: 5.0,
   },
   {
     id: "monster-4",
@@ -88,7 +79,7 @@ export const PROPS: PropPlacement[] = [
     position: [0.07, DESK_PROP_Y, 0.45],
     size: 0.155,
     fit: "height",
-    spin: -1.2,
+    spin: -5.0,
   },
   {
     id: "zyn-1",
@@ -168,15 +159,15 @@ export const ORBIT = {
 
 /**
  * The OS is authored at a fixed pixel resolution and mapped onto the monitor
- * quad. drei's Html divides the object matrix by `400 / distanceFactor`, so
- * this keeps one CSS pixel exactly `width / uiWidth` world units.
+ * through a CSS3D iframe. Scale the CSS3DObject so one desktop pixel lands on
+ * roughly one screen pixel at the monitor shot.
  */
-// 800px maps the panel to roughly one CSS pixel per screen pixel at the
-// monitor shot, so the 11px Windows chrome lands at its intended size.
-export const UI_WIDTH = 800;
+// 1024px gives Henry-like text density on the monitor (18px body on a wider canvas).
+export const UI_WIDTH = 1024;
 export const UI_HEIGHT = Math.round(
   (UI_WIDTH * MONITOR.height) / MONITOR.width,
 );
+/** Legacy constant kept for any tooling that still references it. */
 export const UI_DISTANCE_FACTOR = (400 * MONITOR.width) / UI_WIDTH;
-export const TASKBAR_HEIGHT = 28;
+export const TASKBAR_HEIGHT = 32;
 export const MAXIMIZED_WINDOW_HEIGHT = UI_HEIGHT - TASKBAR_HEIGHT;

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { preloadAmbience, setAmbienceFocus } from "./audio";
+import { preloadAmbience, preloadStartupSound, setAmbienceFocus } from "./audio";
 import { useStore } from "../store/useStore";
 
 /** Keeps the office loop in sync with where the camera is. */
@@ -8,6 +8,7 @@ export function useAmbience() {
 
   useEffect(() => {
     preloadAmbience();
+    preloadStartupSound();
   }, []);
 
   useEffect(() => {

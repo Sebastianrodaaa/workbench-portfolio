@@ -10,6 +10,7 @@ import { BULB_POSITION, ORBIT, PROPS, SHOTS } from "../lib/scene-config";
 import { useStore } from "../store/useStore";
 import { AuxScreen } from "./AuxScreen";
 import { CameraRig } from "./CameraRig";
+import { Css3dBridge, Css3dSync } from "./Css3dRenderer";
 import { Hotspot } from "./Hotspot";
 import { Prop } from "./Prop";
 import { ScreenSurface } from "./ScreenSurface";
@@ -31,7 +32,8 @@ export function Experience({ effects, onPick }: Props) {
   const toggleLamp = useStore((state) => state.toggleLamp);
 
   return (
-    <>
+    <Css3dBridge>
+      <Css3dSync />
       <color attach="background" args={["#06060a"]} />
       <ambientLight intensity={1.25} />
       <directionalLight position={[2.4, 3.2, 1.8]} intensity={0.45} />
@@ -89,6 +91,6 @@ export function Experience({ effects, onPick }: Props) {
           <Effects />
         </Suspense>
       )}
-    </>
+    </Css3dBridge>
   );
 }

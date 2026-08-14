@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { cloneElement, useEffect, useRef, useState } from "react";
 import { profile } from "../lib/content";
 import {
   MAXIMIZED_WINDOW_HEIGHT,
@@ -9,13 +9,21 @@ import { downloadFile } from "../lib/download";
 import { useStore, type WindowId } from "../store/useStore";
 import { APPS, DESKTOP_ORDER, DESKTOP_SHORTCUTS } from "./apps/registry";
 import { Taskbar } from "./Taskbar";
-import { Window } from "./Window";
+import { OsWindow } from "./chrome/OsWindow";
 
 export function Desktop() {
   const windows = useStore((state) => state.windows);
   const zTop = useStore((state) => state.zTop);
+  const booted = useStore((state) => state.booted);
   const openWindow = useStore((state) => state.openWindow);
   const [selected, setSelected] = useState<string | null>(null);
+  const openedAboutOnBoot = useRef(false);
+
+  useEffect(() => {
+    if (!booted || openedAboutOnBoot.current) return;
+    openedAboutOnBoot.current = true;
+    openWindow("about");
+  }, [booted, openWindow]);
 
   const launch = (id: WindowId) => {
     openWindow(id);
@@ -41,7 +49,7 @@ export function Desktop() {
                 onClick={() => setSelected(id)}
                 onDoubleClick={() => launch(id)}
               >
-                {app.icon}
+                {app.icon32}
                 <span>{app.label}</span>
               </button>
             );
@@ -57,7 +65,7 @@ export function Desktop() {
                 downloadFile(shortcut.url, shortcut.filename);
               }}
             >
-              {shortcut.icon}
+              {shortcut.icon32}
               <span>{shortcut.label}</span>
             </button>
           ))}
@@ -74,11 +82,11 @@ export function Desktop() {
           const width = window.maximized ? UI_WIDTH : app.width;
           const height = window.maximized ? MAXIMIZED_WINDOW_HEIGHT : app.height;
           return (
-            <Window
+            <OsWindow
               key={window.id}
               id={window.id}
               title={app.title}
-              icon={app.icon}
+              icon={cloneElement(app.icon16)}
               x={window.x}
               y={window.y}
               z={window.z}
@@ -89,14 +97,13 @@ export function Desktop() {
               focused={window.z === zTop}
             >
               <Body />
-            </Window>
+            </OsWindow>
           );
         })}
 
       </div>
 
-      <Taskbar />
+      {booted && <Taskbar />}
     </div>
   );
 }
-

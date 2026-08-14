@@ -33,7 +33,10 @@ export function Hud() {
   // At the desk the hint teaches the controls; once you are at the machine the
   // interface speaks for itself, so only hover labels remain.
   const hint =
-    hovered ?? (stage === "monitor" ? null : "Drag to look around · Click the monitor to sit down");
+    hovered ??
+    (stage === "monitor"
+      ? null
+      : "Drag to look around · Click the big monitor to sit down");
 
   return (
     <div className={`hud${stage === "loading" || stage === "start" ? " dim" : ""}`}>

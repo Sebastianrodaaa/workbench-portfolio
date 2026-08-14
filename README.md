@@ -1,12 +1,14 @@
 # Workbench portfolio
 
 An interactive 3D workshop: a glTF diorama with a CRT monitor on the desk, and a
-working Windows 95-style desktop rendered as real DOM on the glass. Click the
-monitor to sit down, drag the windows, poke around the MS-DOS prompt.
+working Windows 95-style desktop rendered as real DOM inside the glass — the
+same iframe + CSS3D pattern used on [Henry Heffernan's portfolio](https://henryheffernan.com/).
+Click the monitor to sit down, drag the windows, poke around the MS-DOS prompt.
 
-Built with React Three Fiber, drei, and zustand. No bitmap chrome and no audio
-files — the interface is drawn with CSS bevels and SVG, and the sounds are
-synthesised with the Web Audio API.
+Built with React Three Fiber, Three.js CSS3DRenderer, and zustand. The in-monitor
+UI follows [Henry Heffernan](https://henryheffernan.com/)'s portfolio OS design:
+MSSerif/Millennium fonts, 18px body text, white window surfaces, and no in-DOM
+CRT overlay (glass effects stay on the WebGL monitor layers).
 
 ## Running it
 
@@ -44,25 +46,31 @@ src/
   lib/
     content.ts        all copy, in one place
     scene-config.ts   camera shots, screen transforms, UI panel size
+    monitor-bridge.ts postMessage between the 3D shell and os.html
+    screen-textures.ts procedural smudge, shadow, and static overlays
     audio.ts          synthesised blips, POST beep, startup chime, CRT hum
     pick-quad.ts      finds the flat screen faces inside the single-mesh GLB
   store/useStore.ts   stage machine, window manager, lamp and audio flags
   three/
     Experience.tsx    scene graph; postprocessing is lazy-loaded
+    Css3dRenderer.tsx CSS3DRenderer synced to the R3F camera
     Workbench.tsx     the glTF diorama
-    ScreenSurface.tsx CRT shader (glow, scanlines, power-on wipe)
+    ScreenSurface.tsx CRT shader, CSS3D iframe, glass overlays, cutout plane
     AuxScreen.tsx     the small green terminal, drawn to a canvas texture
     CameraRig.tsx     eased transitions between loading/intro/desk/monitor
     Hotspot.tsx       clickable props, e.g. the lamp cord
   os/                 the desktop: window manager, taskbar, Start menu, apps
+  os-main.tsx         standalone entry mounted by os.html inside the iframe
   ui/                 outer layer: POST screen and HUD
+os.html               second Vite entry — the in-monitor operating system
 ```
 
 The stage machine drives everything. `loading` shows the power-on self test,
 `intro` flies the camera in, `desk` gives you orbit-limited controls, and
-`monitor` docks the camera to the screen and hands pointer events to the DOM
-desktop. The desktop is a `drei/Html` element transformed onto the monitor quad,
-so the interface is genuinely interactive rather than a texture.
+`monitor` docks the camera to the screen and hands pointer events to the iframe
+desktop. The OS runs at `/os.html` and is composited onto the monitor with
+Three.js `CSS3DObject`, while WebGL planes in front add smudges, inner shadow,
+static, and viewing-angle dimming — the Henry Heffernan monitor stack.
 
 `UI_WIDTH` in `src/lib/scene-config.ts` sets the desktop's pixel resolution. It
 is 800 so that one desktop pixel lands on roughly one screen pixel at the

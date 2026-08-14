@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { opensMaximized, spawnWindowPosition } from "../lib/window-spawn";
 
 export type Stage = "loading" | "start" | "intro" | "desk" | "monitor";
 
@@ -48,12 +49,6 @@ type Store = {
   moveWindow: (id: WindowId, x: number, y: number) => void;
 };
 
-// Windows cascade from a point that keeps a typical panel centred on the
-// 800x656 screen instead of hugging the top-left corner.
-const SPAWN_ORIGIN_X = 148;
-const SPAWN_ORIGIN_Y = 74;
-const SPAWN_STEP = 22;
-
 export const useStore = create<Store>((set, get) => ({
   stage: "loading",
   booted: false,
@@ -64,7 +59,7 @@ export const useStore = create<Store>((set, get) => ({
   windows: [],
   zTop: 10,
   spawns: 0,
-  auxMode: 0,
+  auxMode: 2,
 
   setStage: (stage) => set({ stage }),
   enter: () => set({ stage: "intro" }),
@@ -88,6 +83,8 @@ export const useStore = create<Store>((set, get) => ({
     // Cascade on a counter rather than the open window count, so a window
     // opened after a close never lands exactly on top of an existing one.
     const index = get().spawns % 8;
+    const { x, y } = spawnWindowPosition(id, index);
+    const maximized = opensMaximized(id);
     set({
       zTop: zTop + 1,
       spawns: get().spawns + 1,
@@ -95,11 +92,12 @@ export const useStore = create<Store>((set, get) => ({
         ...windows,
         {
           id,
-          x: SPAWN_ORIGIN_X + index * SPAWN_STEP,
-          y: SPAWN_ORIGIN_Y + index * SPAWN_STEP,
+          x: maximized ? 0 : x,
+          y: maximized ? 0 : y,
           z: zTop + 1,
           minimized: false,
-          maximized: false,
+          maximized,
+          restore: maximized ? { x, y } : undefined,
         },
       ],
     });

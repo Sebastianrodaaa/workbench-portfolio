@@ -1,0 +1,55 @@
+/* Henry Heffernan portfolio-inner-site design tokens (henryheffernan.com OS). */
+
+@font-face {
+  font-family: MSSerif;
+  src: url("/fonts/MSSansSerif.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Millennium;
+  src: url("/fonts/Millennium.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: MillenniumBold;
+  src: url("/fonts/Millennium-Bold.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Terminal;
+  src: url("/fonts/Terminal.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --henry-white: #ffffff;
+  --henry-black: #000000;
+  --henry-turquoise: #3e9697;
+  --henry-surface: #c3c6ca;
+  --henry-surface-hover: #e9e9e9;
+  --henry-dark-gray: #86898d;
+  --henry-blue: #0000a3;
+  --henry-dark-blue: #0000aa;
+  --henry-red: #ff0000;
+
+  --henry-ui-font: MSSerif, "MS Sans Serif", Tahoma, Geneva, sans-serif;
+  --henry-body-font: Millennium, "Times New Roman", Times, serif;
+  --henry-body-bold: MillenniumBold, "Times New Roman", Times, serif;
+  --henry-mono-font: Terminal, "Lucida Console", ui-monospace, monospace;
+
+  --henry-ui-size: 14px;
+  --henry-body-size: 18px;
+  --henry-small-size: 12px;
+  --henry-shortcut-size: 11px;
+
+  --henry-border-raised-outer: inset -1px -1px var(--henry-black),
+    inset 1px 1px var(--henry-white);
+  --henry-border-raised-inner: inset -2px -2px var(--henry-dark-gray),
+    inset 2px 2px var(--henry-surface);
+  --henry-border-field: inset -1px -1px var(--henry-white),
+    inset 1px 1px var(--henry-dark-gray), inset -2px -2px var(--henry-surface),
+    inset 2px 2px var(--henry-black);
+}

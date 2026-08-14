@@ -1,97 +1,40 @@
-import { useState } from "react";
-import { about, education, hackathons, profile, skills } from "../../lib/content";
-
-const TABS = ["General", "Education", "Hackathons", "Skills"] as const;
-type Tab = (typeof TABS)[number];
+import { landing, portfolio } from "../../lib/content";
+import { OsPanel } from "../chrome/OsInset";
 
 export function About() {
-  const [tab, setTab] = useState<Tab>("General");
+  const { welcome, aboutMe } = portfolio;
 
   return (
-    <>
-      <div className="tabs" role="tablist">
-        {TABS.map((name) => (
-          <button
-            type="button"
-            key={name}
-            role="tab"
-            aria-selected={tab === name}
-            onClick={() => setTab(name)}
-          >
-            {name}
-          </button>
-        ))}
-      </div>
+    <div className="about-page">
+      <header className="about-hero">
+        <h2 className="about-hero__title">{landing.title}</h2>
+        <p className="about-hero__subtitle">
+          {landing.subtitle.map((item, index) => (
+            <span key={item}>
+              {index > 0 && <span aria-hidden> · </span>}
+              {item}
+            </span>
+          ))}
+        </p>
+      </header>
 
-      <div className="tab-panel" role="tabpanel">
-        {tab === "General" && (
-          <>
-            <h3>{about.heading}</h3>
-            <p className="eyebrow">{profile.role}</p>
-            <div className="rule" />
-            {about.paragraphs.map((paragraph) => (
-              <p key={paragraph.slice(0, 24)}>{paragraph}</p>
-            ))}
-            <div className="rule" />
-            <dl className="field">
-              {about.facts.map((fact) => (
-                <div style={{ display: "contents" }} key={fact.label}>
-                  <dt>{fact.label}</dt>
-                  <dd>{fact.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </>
-        )}
+      <OsPanel className="flow about-body">
+        <h3>{welcome.greeting}</h3>
+        <p>{welcome.intro}</p>
+        <p>{welcome.closing}</p>
 
-        {tab === "Education" && (
-          <>
-            {education.map((entry) => (
-              <fieldset className="group" key={entry.id}>
-                <legend>{entry.period}</legend>
-                <h4>{entry.credential}</h4>
-                <p>
-                  {entry.school}
-                  <br />
-                  {entry.place}
-                </p>
-              </fieldset>
-            ))}
-          </>
+        <h3>{aboutMe.heading}</h3>
+        {aboutMe.blocks.map((block) =>
+          block.type === "figure" ? (
+            <figure className="portfolio-photo" key={block.text}>
+              <img src={block.src} alt={block.alt} loading="lazy" />
+              <figcaption>{block.text}</figcaption>
+            </figure>
+          ) : (
+            <p key={block.text.slice(0, 32)}>{block.text}</p>
+          ),
         )}
-
-        {tab === "Hackathons" && (
-          <>
-            {hackathons.map((win) => (
-              <fieldset className="group" key={win.id}>
-                <legend>{win.location}</legend>
-                <h4>{win.place}</h4>
-                {win.awards && win.awards.length > 0 && (
-                  <p className="eyebrow">{win.awards.join(" · ")}</p>
-                )}
-                <p>{win.event}</p>
-              </fieldset>
-            ))}
-          </>
-        )}
-
-        {tab === "Skills" && (
-          <>
-            {skills.map((group) => (
-              <fieldset className="group" key={group.group}>
-                <legend>{group.group}</legend>
-                <div className="tag-row" style={{ marginTop: 0 }}>
-                  {group.items.map((item) => (
-                    <span className="tag" key={item}>
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </fieldset>
-            ))}
-          </>
-        )}
-      </div>
-    </>
+      </OsPanel>
+    </div>
   );
 }

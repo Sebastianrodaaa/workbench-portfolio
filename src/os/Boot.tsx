@@ -16,6 +16,7 @@ export function Boot() {
   const [visible, setVisible] = useState(0);
   const [phase, setPhase] = useState<"dos" | "splash">("dos");
   const [leaving, setLeaving] = useState(false);
+  const [percent, setPercent] = useState(0);
 
   useEffect(() => {
     powerOn();
@@ -46,6 +47,19 @@ export function Boot() {
     };
   }, [setBooted]);
 
+  useEffect(() => {
+    if (phase !== "splash") return;
+    const start = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const next = Math.min(100, Math.round(((now - start) / SPLASH_MS) * 100));
+      setPercent(next);
+      if (next < 100) frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [phase]);
+
   if (phase === "splash") {
     return (
       <div className={`splash${leaving ? " done" : ""}`}>
@@ -61,8 +75,8 @@ export function Boot() {
             <strong>95</strong>
           </span>
         </div>
-        <div className="splash-bar" aria-hidden>
-          <i />
+        <div className="henry-progress">
+          <div className="henry-progress__bar" style={{ width: `${percent}%` }} />
         </div>
         <small>Starting the desktop...</small>
       </div>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { profile } from "../lib/content";
-import { startAmbience, startHum } from "../lib/audio";
+import { playStartupSound, startAmbience, startHum } from "../lib/audio";
 import { useStore } from "../store/useStore";
 
 const SHOWCASE_YEAR = 2026;
@@ -12,6 +12,7 @@ export function StartScreen() {
   const toggleMute = useStore((state) => state.toggleMute);
 
   const begin = useCallback(() => {
+    playStartupSound();
     startHum();
     startAmbience();
     if (muted) toggleMute();

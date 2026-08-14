@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { experience } from "../../lib/content";
+import { OsInset } from "../chrome/OsInset";
 import { APPS } from "./registry";
 
 export function Work() {
@@ -9,7 +10,7 @@ export function Work() {
   return (
     <>
       <div className="work">
-        <ul className="work-list">
+        <OsInset as="ul" className="work-list">
           {experience.map((role) => (
             <li key={role.id}>
               <button
@@ -22,9 +23,9 @@ export function Work() {
               </button>
             </li>
           ))}
-        </ul>
+        </OsInset>
 
-        <article>
+        <article className="os-panel work-detail">
           <h3>{active.company}</h3>
           <p className="eyebrow">
             {active.title}
@@ -56,10 +57,12 @@ export function Work() {
       </div>
 
       <div className="status-bar">
-        <span>
+        <OsInset as="span" className="status-chip">
           {experience.length} object(s) · {APPS.work.label}
-        </span>
-        <span>{active.company}</span>
+        </OsInset>
+        <OsInset as="span" className="status-chip">
+          {active.company}
+        </OsInset>
       </div>
     </>
   );
