@@ -19,7 +19,6 @@ import { useStore } from "../store/useStore";
 import { useCss3dScene } from "./Css3dRenderer";
 import { useCompactUi } from "../lib/device";
 
-const IFRAME_PADDING = 24;
 const SCREEN_Z = 0.004;
 const LAYER_SCALE = 0.0011;
 
@@ -104,7 +103,7 @@ export function ScreenSurface() {
     iframe.loading = "eager";
     iframe.style.width = `${UI_WIDTH}px`;
     iframe.style.height = `${UI_HEIGHT}px`;
-    iframe.style.padding = `${IFRAME_PADDING}px`;
+    iframe.style.padding = "0";
     iframe.style.boxSizing = "border-box";
     iframe.style.border = "0";
     iframe.style.background = "#008080";

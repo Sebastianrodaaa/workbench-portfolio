@@ -517,11 +517,13 @@ body,
 
 .wallmark {
   position: absolute;
-  right: 16px;
-  bottom: 12px;
+  right: 28px;
+  bottom: 24px;
+  max-width: min(280px, calc(100% - 56px));
   color: var(--henry-white);
   font-family: var(--henry-ui-font);
   font-size: 13px;
+  line-height: 1.35;
   text-align: right;
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.55);
   opacity: 0.65;
@@ -530,7 +532,9 @@ body,
 
 .wallmark strong {
   display: block;
+  margin-bottom: 4px;
   font-size: 18px;
+  white-space: nowrap;
 }
 
 /* ---------- tabs, fields, widgets ---------- */
