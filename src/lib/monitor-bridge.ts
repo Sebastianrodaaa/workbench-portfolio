@@ -2,6 +2,7 @@ export type MonitorBridgeMessage =
   | { type: "monitor-enter" }
   | { type: "monitor-leave" }
   | { type: "os-ready" }
+  | { type: "os-click" }
   | { type: "request-desk" };
 
 export function postToOs(message: MonitorBridgeMessage) {
