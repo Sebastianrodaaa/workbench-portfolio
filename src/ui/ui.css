@@ -289,39 +289,6 @@
   font-weight: 400;
 }
 
-.hud .controls {
-  position: absolute;
-  top: max(18px, env(safe-area-inset-top, 0px));
-  right: max(20px, env(safe-area-inset-right, 0px));
-  display: flex;
-  gap: 4px;
-  pointer-events: auto;
-}
-
-.hud button {
-  min-width: 84px;
-  padding: 4px 10px 5px;
-  border: 0;
-  background: #c0c0c0;
-  box-shadow:
-    inset -1px -1px 0 #000000,
-    inset 1px 1px 0 #ffffff,
-    inset -2px -2px 0 #808080,
-    inset 2px 2px 0 #dfdfdf;
-  color: #000000;
-  font: inherit;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.hud button:active {
-  box-shadow:
-    inset -1px -1px 0 #ffffff,
-    inset 1px 1px 0 #808080,
-    inset -2px -2px 0 #dfdfdf,
-    inset 2px 2px 0 #000000;
-}
-
 /* Balloon help, the way it looked before tooltips got rounded corners. */
 .hud .hint {
   position: absolute;
@@ -363,18 +330,11 @@
 
   .hud .brand {
     font-size: 15px;
-    max-width: calc(100% - 180px);
+    max-width: calc(100% - 24px);
   }
 
   .hud .brand small {
     font-size: 12px;
-  }
-
-  .hud button {
-    min-width: 72px;
-    min-height: 40px;
-    padding: 8px 12px;
-    font-size: 13px;
   }
 
   .hud .hint {
